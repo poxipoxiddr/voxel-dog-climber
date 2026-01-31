@@ -102,4 +102,15 @@ class MapGenerator {
         // Regenerate
         this.generateInitialPlatforms();
     }
+
+    addFloor() {
+        // Create a large floor platform at y = -5 for multiplayer mode
+        const floor = VoxelModels.createPlatform(40, 40, 1);
+        floor.position.set(0, -5, 0);
+        floor.userData.width = 40;
+        floor.userData.depth = 40;
+        floor.userData.height = 1;
+        this.scene.add(floor);
+        this.platforms.push(floor);
+    }
 }

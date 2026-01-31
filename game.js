@@ -13,6 +13,8 @@ class Game {
         this.canvas = document.getElementById('gameCanvas');
         this.isRunning = false;
         this.isPaused = false;
+        this.isMultiplayer = false; // Multiplayer mode flag
+        this.multiplayerWinScore = 5000; // First to 5000 wins
 
         this.remotePlayers = new Map(); // id -> RemotePlayer instance
 
@@ -203,6 +205,12 @@ class Game {
             }
         };
 
+        // Handle other player winning
+        Multiplayer.onPlayerWin = (playerId, winnerName) => {
+            this.isRunning = false;
+            this.showMultiplayerWin(false, winnerName);
+        };
+
         // Multiplayer - Open lobby
         multiplayerBtn.addEventListener('click', () => {
             instructions.classList.add('hidden');
@@ -215,14 +223,14 @@ class Game {
             instructions.classList.remove('hidden');
             roomCreated.classList.add('hidden');
             roomJoin.classList.add('hidden');
-            lobbyOptions.style.display = 'flex';
+            document.getElementById('lobbyNickname').classList.remove('hidden');
             Multiplayer.destroy();
         });
 
         // Create room
         createRoomBtn.addEventListener('click', async () => {
-            const nickname = document.getElementById('playerNameInput').value.trim() || '호스트';
-            lobbyOptions.style.display = 'none';
+            const nickname = document.getElementById('lobbyNameInput').value.trim() || '호스트';
+            document.getElementById('lobbyNickname').classList.add('hidden');
             roomCreated.classList.remove('hidden');
             roomCodeDisplay.textContent = '생성 중...';
 
@@ -257,7 +265,7 @@ class Game {
 
         // Join room
         joinRoomBtn.addEventListener('click', () => {
-            lobbyOptions.style.display = 'none';
+            document.getElementById('lobbyNickname').classList.add('hidden');
             roomJoin.classList.remove('hidden');
             joinStatus.textContent = '';
         });
@@ -265,7 +273,7 @@ class Game {
         // Confirm join
         confirmJoinBtn.addEventListener('click', async () => {
             const code = roomCodeInput.value.trim().toUpperCase();
-            const nickname = document.getElementById('playerNameInput').value.trim() || '플레이어';
+            const nickname = document.getElementById('lobbyNameInput').value.trim() || '플레이어';
 
             if (code.length !== 4) {
                 joinStatus.textContent = '4자리 코드를 입력하세요';
@@ -282,8 +290,9 @@ class Game {
                 joinStatus.className = 'join-status success';
 
                 Multiplayer.onGameStart = () => {
+                    this.isMultiplayer = true;
                     multiplayerLobby.classList.add('hidden');
-                    this.startGame();
+                    this.startMultiplayerGame();
                     AudioSystem.startBGM();
                 };
             } catch (err) {
@@ -298,11 +307,20 @@ class Game {
                 alert('플레이어가 부족합니다.');
                 return;
             }
+            this.isMultiplayer = true;
             Multiplayer.startGame();
             multiplayerLobby.classList.add('hidden');
-            this.startGame();
+            this.startMultiplayerGame();
             AudioSystem.startBGM();
         });
+    }
+
+    startMultiplayerGame() {
+        this.isMultiplayer = true;
+        this.resetGame();
+        // Add floor platform for multiplayer
+        this.mapGenerator.addFloor();
+        this.startGame();
     }
 
     startGame() {
@@ -324,6 +342,9 @@ class Game {
     }
 
     gameOver() {
+        // Skip game over in multiplayer mode
+        if (this.isMultiplayer) return;
+
         this.isRunning = false;
 
         const stats = this.scoring.getFinalStats();
@@ -333,6 +354,32 @@ class Game {
         const gameOverScreen = document.getElementById('gameOver');
         gameOverScreen.classList.remove('hidden');
         AudioSystem.playGameOver();
+    }
+
+    checkMultiplayerWin() {
+        if (!this.isMultiplayer) return false;
+        const score = this.scoring.getScore();
+        if (score >= this.multiplayerWinScore) {
+            this.isRunning = false;
+            Multiplayer.broadcastWin();
+            this.showMultiplayerWin(true);
+            return true;
+        }
+        return false;
+    }
+
+    showMultiplayerWin(isWinner, winnerName = '') {
+        const gameOverScreen = document.getElementById('gameOver');
+        document.getElementById('finalScore').textContent = this.scoring.getScore().toLocaleString();
+        document.getElementById('finalAltitude').textContent = `${this.player.getAltitude()}m`;
+        const h1 = gameOverScreen.querySelector('h1');
+        h1.textContent = isWinner ? '🏆 승리!' : `${winnerName}님 승리!`;
+        gameOverScreen.classList.remove('hidden');
+        if (isWinner) {
+            AudioSystem.playHighJump(); // Victory sound
+        } else {
+            AudioSystem.playGameOver();
+        }
     }
 
     update() {
@@ -361,6 +408,11 @@ class Game {
         const milestoneReached = this.scoring.update(this.player.getAltitude());
         if (milestoneReached) {
             this.player.activateSuperJump(5);
+        }
+
+        // Check multiplayer win condition
+        if (this.checkMultiplayerWin()) {
+            return;
         }
 
         // Sync local position to multiplayer

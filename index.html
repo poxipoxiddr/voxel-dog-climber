@@ -110,22 +110,28 @@
     <div id="multiplayerLobby" class="overlay hidden">
         <div class="overlay-content lobby-content">
             <h1>🐕 함께하기</h1>
-            <p class="tagline">친구들과 함께 하늘을 올라가요! (최대 8명)</p>
+            <p class="tagline">먼저 5000점에 도달하면 승리! (최대 8명)</p>
 
-            <div class="lobby-options">
-                <button id="createRoomBtn" class="lobby-btn">
-                    <span class="btn-icon">🏠</span>
-                    <span class="btn-text">방 만들기</span>
-                </button>
-                <button id="joinRoomBtn" class="lobby-btn">
-                    <span class="btn-icon">🚪</span>
-                    <span class="btn-text">참가하기</span>
-                </button>
+            <!-- Step 1: Nickname Input -->
+            <div id="lobbyNickname" class="lobby-step">
+                <input type="text" id="lobbyNameInput" class="room-input name-input" placeholder="닉네임 입력 (한글 가능)"
+                    maxlength="10">
+                <div class="lobby-options">
+                    <button id="createRoomBtn" class="lobby-btn">
+                        <span class="btn-icon">🏠</span>
+                        <span class="btn-text">방 만들기</span>
+                    </button>
+                    <button id="joinRoomBtn" class="lobby-btn">
+                        <span class="btn-icon">🚪</span>
+                        <span class="btn-text">참가하기</span>
+                    </button>
+                </div>
             </div>
 
+            <!-- Step 2a: Room Created (Host) -->
             <div id="roomCreated" class="room-info hidden">
                 <h2>방 코드</h2>
-                <div class="room-code" id="roomCodeDisplay">------</div>
+                <div class="room-code" id="roomCodeDisplay">----</div>
                 <p class="room-hint">친구에게 이 코드를 공유하세요!</p>
                 <div class="player-list" id="playerList">
                     <div class="player-item host">🐕 호스트 (나)</div>
@@ -133,10 +139,9 @@
                 <button id="startMultiBtn" class="start-button">게임 시작</button>
             </div>
 
+            <!-- Step 2b: Join Room (Guest) -->
             <div id="roomJoin" class="room-info hidden">
                 <h2>방 참가</h2>
-                <input type="text" id="playerNameInput" class="room-input name-input" placeholder="닉네임 (한글 가능)"
-                    maxlength="10">
                 <input type="text" id="roomCodeInput" class="room-input" placeholder="4자리 코드" maxlength="4">
                 <button id="confirmJoinBtn" class="start-button">참가</button>
                 <div id="joinStatus" class="join-status"></div>

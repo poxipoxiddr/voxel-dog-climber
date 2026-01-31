@@ -117,6 +117,11 @@ class MultiplayerManager {
                 .on('broadcast', { event: 'gameStart' }, () => {
                     if (this.onGameStart) this.onGameStart();
                 })
+                .on('broadcast', { event: 'playerWin' }, ({ payload }) => {
+                    if (payload.playerId !== this.localPlayerId) {
+                        if (this.onPlayerWin) this.onPlayerWin(payload.playerId, payload.name);
+                    }
+                })
                 .subscribe(async (status) => {
                     if (status === 'SUBSCRIBED') {
                         // Track presence
@@ -182,6 +187,19 @@ class MultiplayerManager {
         });
 
         if (this.onGameStart) this.onGameStart();
+    }
+
+    broadcastWin() {
+        if (!this.channel) return;
+
+        this.channel.send({
+            type: 'broadcast',
+            event: 'playerWin',
+            payload: {
+                playerId: this.localPlayerId,
+                name: this.localPlayerData.name
+            }
+        });
     }
 
     getOtherPlayers() {
