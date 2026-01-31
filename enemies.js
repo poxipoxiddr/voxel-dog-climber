@@ -17,7 +17,8 @@ class EnemyManager {
         this.lastSpawnTime = 0;
     }
 
-    update(delta, playerY) {
+    update(delta, player) {
+        const playerY = player.position.y;
         const currentTime = Date.now() / 1000;
 
         // Spawn pigeons (horizontal movement)

@@ -504,3 +504,72 @@ class Player {
         if (this.rightWing) this.rightWing.visible = false;
     }
 }
+
+class RemotePlayer {
+    constructor(scene, data) {
+        this.scene = scene;
+        this.id = data.id;
+        this.name = data.name || '플레이어';
+        this.color = data.color || 0x8B5E3C;
+
+        // Create dog model with specific color
+        this.model = VoxelModels.createDog(this.color);
+        this.scene.add(this.model);
+
+        // Add nickname label
+        this.label = this.createNameLabel(this.name);
+        this.scene.add(this.label);
+
+        this.position = new THREE.Vector3(0, 0, 0);
+        if (data.position) {
+            this.position.set(data.position.x, data.position.y, data.position.z);
+        }
+
+        this.model.position.copy(this.position);
+    }
+
+    createNameLabel(name) {
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.width = 256;
+        canvas.height = 64;
+
+        // Background
+        context.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        context.roundRect(0, 0, 256, 64, 10);
+        context.fill();
+
+        // Text
+        context.font = 'bold 32px "Outfit", sans-serif';
+        context.fillStyle = 'white';
+        context.textAlign = 'center';
+        context.textBaseline = 'middle';
+        context.fillText(name, 128, 32);
+
+        const texture = new THREE.CanvasTexture(canvas);
+        const spriteMaterial = new THREE.SpriteMaterial({ map: texture, transparent: true });
+        const sprite = new THREE.Sprite(spriteMaterial);
+        sprite.scale.set(4, 1, 1);
+        return sprite;
+    }
+
+    updatePosition(pos) {
+        this.position.set(pos.x, pos.y, pos.z);
+        this.model.position.copy(this.position);
+
+        // Update label position (above head)
+        this.label.position.set(pos.x, pos.y + 3, pos.z);
+
+        // Rotation based on movement direction (simplified)
+        if (this.lastX !== undefined) {
+            if (pos.x < this.lastX) this.model.rotation.y = Math.PI / 4;
+            else if (pos.x > this.lastX) this.model.rotation.y = -Math.PI / 4;
+        }
+        this.lastX = pos.x;
+    }
+
+    destroy() {
+        this.scene.remove(this.model);
+        this.scene.remove(this.label);
+    }
+}

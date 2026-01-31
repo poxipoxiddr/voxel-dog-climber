@@ -11,7 +11,8 @@ class ItemManager {
         this.spawnHeight = 0;
     }
 
-    update(delta, playerY, platforms) {
+    update(delta, player, platforms) {
+        const playerY = player.position.y;
         // Spawn new items on platforms above player
         platforms.forEach(platform => {
             const platformY = platform.position.y;

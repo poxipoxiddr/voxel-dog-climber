@@ -24,16 +24,16 @@ const VoxelModels = {
     },
 
     // Create the dog character
-    createDog() {
+    createDog(customColor = 0x8B5E3C) {
         const dog = new THREE.Group();
 
-        // Body (main torso) - Darker Brown
-        const body = this.createVoxel(0x8B5E3C, 1.5);
+        // Body (main torso)
+        const body = this.createVoxel(customColor, 1.5);
         body.position.y = 0;
         dog.add(body);
 
         // Head
-        const head = this.createVoxel(0x8B5E3C, 1.2);
+        const head = this.createVoxel(customColor, 1.2);
         head.position.set(0, 0.5, 0.8);
         dog.add(head);
 

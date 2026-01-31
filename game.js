@@ -2,11 +2,19 @@
 // Main Game Logic
 // ===================================
 
+// Supabase Configuration - REPLACE WITH YOUR OWN
+const SUPABASE_CONFIG = {
+    url: 'https://mlivsawbmqebzzfcherd.supabase.co',
+    key: 'sb_publishable_dDSA7OfaV54F-q-Q-gXKPA_PxxRhOON'
+};
+
 class Game {
     constructor() {
         this.canvas = document.getElementById('gameCanvas');
         this.isRunning = false;
         this.isPaused = false;
+
+        this.remotePlayers = new Map(); // id -> RemotePlayer instance
 
         this.setupThreeJS();
         this.setupLighting();
@@ -131,6 +139,22 @@ class Game {
         const instructions = document.getElementById('instructions');
         const gameOverScreen = document.getElementById('gameOver');
 
+        // Multiplayer UI elements
+        const multiplayerBtn = document.getElementById('multiplayerBtn');
+        const multiplayerLobby = document.getElementById('multiplayerLobby');
+        const createRoomBtn = document.getElementById('createRoomBtn');
+        const joinRoomBtn = document.getElementById('joinRoomBtn');
+        const roomCreated = document.getElementById('roomCreated');
+        const roomJoin = document.getElementById('roomJoin');
+        const roomCodeDisplay = document.getElementById('roomCodeDisplay');
+        const roomCodeInput = document.getElementById('roomCodeInput');
+        const confirmJoinBtn = document.getElementById('confirmJoinBtn');
+        const startMultiBtn = document.getElementById('startMultiBtn');
+        const backToMenuBtn = document.getElementById('backToMenuBtn');
+        const joinStatus = document.getElementById('joinStatus');
+        const lobbyOptions = document.querySelector('.lobby-options');
+
+        // Solo play
         startBtn.addEventListener('click', () => {
             instructions.classList.add('hidden');
             this.startGame();
@@ -141,6 +165,143 @@ class Game {
             gameOverScreen.classList.add('hidden');
             this.resetGame();
             this.startGame();
+        });
+
+        // Initialize Multiplayer with config
+        Multiplayer.init(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
+
+        // Multiplayer callbacks
+        Multiplayer.onPlayerJoin = (id, data) => {
+            const remotePlayer = new RemotePlayer(this.scene, { id, ...data });
+            this.remotePlayers.set(id, remotePlayer);
+
+            // Lobby UI update if visible
+            const playerList = document.getElementById('playerList');
+            if (playerList) {
+                const item = document.createElement('div');
+                item.className = 'player-item';
+                item.id = 'player-' + id;
+                item.textContent = `🐕 ${data.name}`;
+                playerList.appendChild(item);
+            }
+        };
+
+        Multiplayer.onPlayerLeave = (id) => {
+            const remotePlayer = this.remotePlayers.get(id);
+            if (remotePlayer) {
+                remotePlayer.destroy();
+                this.remotePlayers.delete(id);
+            }
+            const item = document.getElementById('player-' + id);
+            if (item) item.remove();
+        };
+
+        Multiplayer.onPlayerUpdate = (id, pos) => {
+            const remotePlayer = this.remotePlayers.get(id);
+            if (remotePlayer) {
+                remotePlayer.updatePosition(pos);
+            }
+        };
+
+        // Multiplayer - Open lobby
+        multiplayerBtn.addEventListener('click', () => {
+            instructions.classList.add('hidden');
+            multiplayerLobby.classList.remove('hidden');
+        });
+
+        // Back to menu
+        backToMenuBtn.addEventListener('click', () => {
+            multiplayerLobby.classList.add('hidden');
+            instructions.classList.remove('hidden');
+            roomCreated.classList.add('hidden');
+            roomJoin.classList.add('hidden');
+            lobbyOptions.style.display = 'flex';
+            Multiplayer.destroy();
+        });
+
+        // Create room
+        createRoomBtn.addEventListener('click', async () => {
+            const nickname = document.getElementById('playerNameInput').value.trim() || '호스트';
+            lobbyOptions.style.display = 'none';
+            roomCreated.classList.remove('hidden');
+            roomCodeDisplay.textContent = '생성 중...';
+
+            try {
+                const code = await Multiplayer.createRoom(nickname);
+                roomCodeDisplay.textContent = code;
+
+                // Setup player join callback
+                Multiplayer.onPlayerJoin = (playerId, playerData) => {
+                    const playerList = document.getElementById('playerList');
+                    const item = document.createElement('div');
+                    item.className = 'player-item';
+                    item.id = 'player-' + playerId;
+                    item.textContent = `🐕 ${playerData.name}`;
+                    playerList.appendChild(item);
+                };
+
+                Multiplayer.onPlayerLeave = (playerId) => {
+                    const remotePlayer = this.remotePlayers.get(playerId);
+                    if (remotePlayer) {
+                        remotePlayer.destroy();
+                        this.remotePlayers.delete(playerId);
+                    }
+                    const item = document.getElementById('player-' + playerId);
+                    if (item) item.remove();
+                };
+            } catch (err) {
+                roomCodeDisplay.textContent = '오류 발생';
+                console.error(err);
+            }
+        });
+
+        // Join room
+        joinRoomBtn.addEventListener('click', () => {
+            lobbyOptions.style.display = 'none';
+            roomJoin.classList.remove('hidden');
+            joinStatus.textContent = '';
+        });
+
+        // Confirm join
+        confirmJoinBtn.addEventListener('click', async () => {
+            const code = roomCodeInput.value.trim().toUpperCase();
+            const nickname = document.getElementById('playerNameInput').value.trim() || '플레이어';
+
+            if (code.length !== 4) {
+                joinStatus.textContent = '4자리 코드를 입력하세요';
+                joinStatus.className = 'join-status error';
+                return;
+            }
+
+            joinStatus.textContent = '연결 중...';
+            joinStatus.className = 'join-status';
+
+            try {
+                await Multiplayer.joinRoom(code, nickname);
+                joinStatus.textContent = '연결 성공! 호스트가 시작하면 게임이 시작됩니다.';
+                joinStatus.className = 'join-status success';
+
+                Multiplayer.onGameStart = () => {
+                    multiplayerLobby.classList.add('hidden');
+                    this.startGame();
+                    AudioSystem.startBGM();
+                };
+            } catch (err) {
+                joinStatus.textContent = '연결 실패: ' + (err.message || '알 수 없는 오류');
+                joinStatus.className = 'join-status error';
+            }
+        });
+
+        // Start multiplayer game (host only)
+        startMultiBtn.addEventListener('click', () => {
+            if (Multiplayer.getPlayerCount() < 1) {
+                alert('플레이어가 부족합니다.');
+                return;
+            }
+            Multiplayer.startGame();
+            multiplayerLobby.classList.add('hidden');
+            this.startGame();
+            AudioSystem.startBGM();
         });
     }
 
@@ -189,14 +350,22 @@ class Game {
         }
 
         this.mapGenerator.update(this.player.position.y);
-        this.itemManager.update(delta, this.player.position.y, this.mapGenerator.getPlatforms());
-        this.enemyManager.update(delta, this.player.position.y);
-        this.bubbleManager.update(delta, this.player.position.y, this.mapGenerator.getPlatforms());
-        this.rocketManager.update(delta, this.player.position.y, this.mapGenerator.getPlatforms());
-        this.hamsterManager.update(delta, this.player.position.y, this.mapGenerator.getPlatforms());
+        const platforms = this.mapGenerator.getPlatforms();
+
+        this.itemManager.update(delta, this.player, platforms);
+        this.enemyManager.update(delta, this.player);
+        this.bubbleManager.update(delta, this.player, platforms);
+        this.rocketManager.update(delta, this.player, platforms);
+        this.hamsterManager.update(delta, this.player, platforms);
+
         const milestoneReached = this.scoring.update(this.player.getAltitude());
         if (milestoneReached) {
             this.player.activateSuperJump(5);
+        }
+
+        // Sync local position to multiplayer
+        if (Multiplayer.channel) {
+            Multiplayer.sendPosition(this.player.position);
         }
 
         Effects.update(delta, this.scene);

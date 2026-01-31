@@ -98,8 +98,51 @@
                 </div>
             </div>
 
-            <button id="startBtn" class="start-button">게임 시작</button>
+            <div class="button-group">
+                <button id="startBtn" class="start-button">혼자하기</button>
+                <button id="multiplayerBtn" class="start-button multiplayer-btn">함께하기</button>
+            </div>
             <div class="high-score">최고 기록: <span id="highScore">0</span>m</div>
+        </div>
+    </div>
+
+    <!-- Multiplayer Lobby Overlay -->
+    <div id="multiplayerLobby" class="overlay hidden">
+        <div class="overlay-content lobby-content">
+            <h1>🐕 함께하기</h1>
+            <p class="tagline">친구들과 함께 하늘을 올라가요! (최대 8명)</p>
+
+            <div class="lobby-options">
+                <button id="createRoomBtn" class="lobby-btn">
+                    <span class="btn-icon">🏠</span>
+                    <span class="btn-text">방 만들기</span>
+                </button>
+                <button id="joinRoomBtn" class="lobby-btn">
+                    <span class="btn-icon">🚪</span>
+                    <span class="btn-text">참가하기</span>
+                </button>
+            </div>
+
+            <div id="roomCreated" class="room-info hidden">
+                <h2>방 코드</h2>
+                <div class="room-code" id="roomCodeDisplay">------</div>
+                <p class="room-hint">친구에게 이 코드를 공유하세요!</p>
+                <div class="player-list" id="playerList">
+                    <div class="player-item host">🐕 호스트 (나)</div>
+                </div>
+                <button id="startMultiBtn" class="start-button">게임 시작</button>
+            </div>
+
+            <div id="roomJoin" class="room-info hidden">
+                <h2>방 참가</h2>
+                <input type="text" id="playerNameInput" class="room-input name-input" placeholder="닉네임 (한글 가능)"
+                    maxlength="10">
+                <input type="text" id="roomCodeInput" class="room-input" placeholder="4자리 코드" maxlength="4">
+                <button id="confirmJoinBtn" class="start-button">참가</button>
+                <div id="joinStatus" class="join-status"></div>
+            </div>
+
+            <button id="backToMenuBtn" class="back-btn">← 메뉴로</button>
         </div>
     </div>
 
@@ -134,6 +177,9 @@
     <script src="player.js"></script>
     <script src="mapGenerator.js"></script>
     <script src="scoring.js"></script>
+    <!-- Supabase for multiplayer -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="multiplayer.js"></script>
     <script src="game.js"></script>
 </body>
 

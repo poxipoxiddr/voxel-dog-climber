@@ -10,7 +10,8 @@ class HamsterManager {
         this.spawnChance = 0.008; // Spawn chance per frame
     }
 
-    update(delta, playerY, platforms) {
+    update(delta, player, platforms) {
+        const playerY = player.position.y;
         // Spawn hamster swarms from platform sides
         if (Math.random() < this.spawnChance) {
             this.spawnHamsterSwarm(playerY, platforms);

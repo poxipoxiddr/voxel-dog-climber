@@ -539,3 +539,162 @@ body {
         right: 15px;
     }
 }
+
+/* ===================================
+   Multiplayer Lobby Styles
+   =================================== */
+.button-group {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.multiplayer-btn {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+}
+
+.multiplayer-btn:hover {
+    box-shadow: 0 12px 32px rgba(16, 185, 129, 0.6);
+}
+
+.lobby-content {
+    min-width: 320px;
+}
+
+.lobby-options {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.lobby-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 20px 30px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    color: white;
+    font-family: 'Outfit', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.lobby-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: #a78bfa;
+    transform: translateY(-3px);
+}
+
+.btn-icon {
+    font-size: 32px;
+}
+
+.btn-text {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.room-info {
+    margin: 20px 0;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+}
+
+.room-code {
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: 8px;
+    color: #fbbf24;
+    text-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
+    margin: 10px 0;
+}
+
+.room-hint {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 15px;
+}
+
+.room-input {
+    width: 220px;
+    padding: 12px 20px;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    color: white;
+    font-family: 'Outfit', sans-serif;
+    outline: none;
+    margin-bottom: 10px;
+}
+
+.name-input {
+    letter-spacing: 0;
+    font-size: 16px;
+    text-transform: none;
+}
+
+.room-input:focus {
+    border-color: #a78bfa;
+    box-shadow: 0 0 20px rgba(167, 139, 250, 0.3);
+}
+
+.player-list {
+    max-height: 150px;
+    overflow-y: auto;
+    margin: 15px 0;
+}
+
+.player-item {
+    padding: 8px 12px;
+    margin: 5px 0;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.player-item.host {
+    border-left: 3px solid #fbbf24;
+}
+
+.join-status {
+    font-size: 14px;
+    margin-top: 10px;
+    min-height: 20px;
+}
+
+.join-status.error {
+    color: #f87171;
+}
+
+.join-status.success {
+    color: #34d399;
+}
+
+.back-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.7);
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: all 0.2s ease;
+}
+
+.back-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
