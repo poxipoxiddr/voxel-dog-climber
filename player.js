@@ -160,7 +160,8 @@ class Player {
         if (btnHighJump) {
             btnHighJump.addEventListener('touchstart', (e) => {
                 e.preventDefault();
-                if (!this.keys.highJump && this.canJump()) {
+                // High jump only available on 3rd jump
+                if (!this.keys.highJump && this.jumpCount === 2 && this.canJump()) {
                     this.jump(true);
                 }
                 this.keys.highJump = true;
@@ -521,7 +522,7 @@ class RemotePlayer {
         this.scene.add(this.model);
 
         // Add nickname label
-        this.label = this.createNameLabel(this.name);
+        this.label = this.createNameLabel(this.name, this.color);
         this.scene.add(this.label);
 
         this.position = new THREE.Vector3(0, 0, 0);
@@ -532,16 +533,21 @@ class RemotePlayer {
         this.model.position.copy(this.position);
     }
 
-    createNameLabel(name) {
+    createNameLabel(name, color) {
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
         canvas.width = 256;
         canvas.height = 64;
 
-        // Background
-        context.fillStyle = 'rgba(0, 0, 0, 0.5)';
-        context.roundRect(0, 0, 256, 64, 10);
+        // Background & Border
+        const hexColor = '#' + color.toString(16).padStart(6, '0');
+        context.beginPath();
+        context.roundRect(3, 3, 250, 58, 12); // Slightly inset to avoid clipping
+        context.fillStyle = 'rgba(0, 0, 0, 0.7)';
         context.fill();
+        context.strokeStyle = hexColor;
+        context.lineWidth = 6;
+        context.stroke();
 
         // Text
         context.font = 'bold 32px "Outfit", sans-serif';

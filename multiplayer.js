@@ -27,14 +27,14 @@ class MultiplayerManager {
         this.onPlayerWin = null;
 
         this.playerColors = [
-            0x8B5E3C, // Brown
-            0xFF6B6B, // Red
-            0x4ECDC4, // Teal
-            0xFFE66D, // Yellow
-            0x95E1D3, // Mint
-            0xF38181, // Coral
-            0xAA96DA, // Purple
-            0x67C8D0  // Cyan
+            0xFF4D4D, // Vibrant Red
+            0x4DFF4D, // Vibrant Green
+            0x4D4DFF, // Vibrant Blue
+            0xFFFF4D, // Vibrant Yellow
+            0xFF4DFF, // Vibrant Pink/Magenta
+            0x4DFFFF, // Vibrant Cyan
+            0xFFA64D, // Vibrant Orange
+            0xB34DFF  // Vibrant Purple
         ];
     }
 
