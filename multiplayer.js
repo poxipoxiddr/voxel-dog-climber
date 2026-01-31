@@ -23,6 +23,7 @@ class MultiplayerManager {
         this.onPlayerJoin = null;
         this.onPlayerLeave = null;
         this.onGameStart = null;
+        this.onPlayerWin = null;
 
         this.playerColors = [
             0x8B5E3C, // Brown

@@ -467,6 +467,10 @@ class Player {
         CameraController.setSpeedEffect(true);
     }
 
+    getAltitude() {
+        return Math.floor(this.position.y);
+    }
+
     activateLevitation(duration = 3) { // Reduced from 5 to 3 seconds
         this.hasLevitation = true;
         this.levitationTimer = duration;

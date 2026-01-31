@@ -55,6 +55,10 @@ class ScoringSystem {
         localStorage.setItem('voxelDogHighScore', this.highScore.toString());
     }
 
+    getScore() {
+        return this.score;
+    }
+
     getFinalStats() {
         return {
             score: this.score,
