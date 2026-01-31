@@ -7,6 +7,10 @@
     box-sizing: border-box;
 }
 
+.hidden {
+    display: none;
+}
+
 body {
     font-family: 'Outfit', sans-serif;
     overflow: hidden;
@@ -190,6 +194,7 @@ body {
 .overlay.hidden {
     opacity: 0;
     pointer-events: none;
+    display: flex;
 }
 
 .overlay-content {
@@ -211,35 +216,130 @@ body {
 @media (max-height: 700px) {
     .overlay-content {
         max-height: 95vh;
-        padding: 15px;
+        padding: 12px;
     }
 
     .overlay-content h1 {
-        font-size: 22px;
-        margin-bottom: 3px;
+        font-size: 20px;
+        margin-bottom: 2px;
     }
 
     .tagline {
-        font-size: 12px;
-        margin-bottom: 10px;
+        font-size: 11px;
+        margin-bottom: 5px;
     }
 
     .instruction-grid {
-        gap: 10px;
-        margin-bottom: 10px;
+        gap: 5px;
+        margin-bottom: 5px;
     }
 
     .start-button {
-        padding: 12px 30px;
+        padding: 10px 20px;
         font-size: 14px;
     }
 
     .lobby-options {
-        margin: 10px 0;
+        margin: 5px 0;
+        gap: 8px;
     }
 
     .lobby-btn {
-        padding: 12px 20px;
+        padding: 8px 12px;
+        flex-direction: row;
+        /* Horizontal on small screens */
+        gap: 10px;
+    }
+
+    .btn-icon {
+        font-size: 20px;
+    }
+
+    .btn-text {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 600px) {
+    .button-group {
+        flex-direction: row !important;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .start-button {
+        flex: 1;
+        min-width: 120px;
+        padding: 12px 10px;
+    }
+
+    #instructions .overlay-content {
+        padding: 12px;
+        max-height: 92vh;
+    }
+
+    #instructions .overlay-content h1 {
+        font-size: 22px;
+        margin-bottom: 4px;
+    }
+
+    #instructions .tagline {
+        font-size: 11px;
+        margin-bottom: 8px;
+    }
+
+    #instructions .instruction-grid {
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+
+    #instructions .controls h2,
+    #instructions .items h2 {
+        font-size: 12px;
+        margin-bottom: 4px;
+    }
+
+    #instructions .control-item,
+    #instructions .item-info {
+        padding: 6px 8px;
+        gap: 6px;
+        margin-bottom: 6px;
+    }
+
+    #instructions .key,
+    #instructions .triple {
+        min-width: 60px;
+        padding: 6px 8px;
+        font-size: 11px;
+    }
+
+    #instructions .item-icon {
+        font-size: 18px;
+    }
+
+    #instructions .item-name {
+        font-size: 11px;
+        min-width: 48px;
+    }
+
+    #instructions .desc,
+    #instructions .item-effect {
+        display: none;
+    }
+
+    #instructions .button-group {
+        margin-top: 6px;
+        gap: 6px;
+    }
+
+    #instructions .start-button {
+        font-size: 14px;
+        padding: 10px 12px;
+    }
+
+    #instructions .high-score {
+        margin-top: 8px;
+        font-size: 12px;
     }
 }
 

@@ -240,6 +240,7 @@ class Game {
         createRoomBtn.addEventListener('click', async () => {
             const nickname = document.getElementById('lobbyNameInput').value.trim() || '호스트';
             document.getElementById('lobbyNickname').classList.add('hidden');
+            document.getElementById('roomJoinInput').classList.add('hidden'); // Ensure join box is hidden
             document.getElementById('roomCodeInfo').classList.remove('hidden');
             roomCreated.classList.remove('hidden');
             roomCodeDisplay.textContent = '생성 중...';
@@ -257,7 +258,8 @@ class Game {
         joinRoomBtn.addEventListener('click', () => {
             document.getElementById('lobbyNickname').classList.add('hidden');
             document.getElementById('roomJoinInput').classList.remove('hidden');
-            document.getElementById('roomCodeInfo').classList.remove('hidden');
+            document.getElementById('roomCodeInfo').classList.add('hidden'); // Initially hide code box in join flow
+            roomCreated.classList.add('hidden'); // Hide start button/player list
             document.getElementById('joinStatus').textContent = '';
         });
 
@@ -279,6 +281,10 @@ class Game {
                 await Multiplayer.joinRoom(code, nickname);
                 joinStatus.textContent = '연결 성공! 호스트가 시작하면 게임이 시작됩니다.';
                 joinStatus.className = 'join-status success';
+
+                // Show room code info only after successful join
+                document.getElementById('roomCodeInfo').classList.remove('hidden');
+                roomCodeDisplay.textContent = code;
 
                 Multiplayer.onGameStart = () => {
                     this.isMultiplayer = true;
