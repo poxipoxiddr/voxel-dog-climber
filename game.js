@@ -191,6 +191,9 @@ class Game {
                 const item = document.createElement('div');
                 item.className = 'player-item';
                 item.id = 'player-' + id;
+                const hexColor = '#' + data.color.toString(16).padStart(6, '0');
+                item.style.borderLeft = `4px solid ${hexColor}`;
+                item.style.fontWeight = '700';
                 item.textContent = `🐕 ${data.name}`;
                 playerList.appendChild(item);
             }
@@ -248,6 +251,14 @@ class Game {
             try {
                 const code = await Multiplayer.createRoom(nickname);
                 roomCodeDisplay.textContent = code;
+
+                // Update host's own lobby item color
+                const hostItem = document.querySelector('.player-item.host');
+                if (hostItem) {
+                    const hexColor = '#' + Multiplayer.localPlayerData.color.toString(16).padStart(6, '0');
+                    hostItem.style.borderLeft = `4px solid ${hexColor}`;
+                    hostItem.style.fontWeight = '700';
+                }
             } catch (err) {
                 roomCodeDisplay.textContent = '오류 발생';
                 console.error(err);
@@ -315,6 +326,10 @@ class Game {
     startMultiplayerGame() {
         this.isMultiplayer = true;
         this.resetGame();
+        // Sync local player color
+        if (Multiplayer.localPlayerData.color) {
+            this.player.setColor(Multiplayer.localPlayerData.color);
+        }
         // Add floor platform for multiplayer
         this.mapGenerator.addFloor();
         this.startGame();

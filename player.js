@@ -472,6 +472,19 @@ class Player {
         return Math.floor(this.position.y);
     }
 
+    setColor(color) {
+        // Recreate the model with the new color
+        this.scene.remove(this.model);
+        this.model = VoxelModels.createDog(color);
+        this.scene.add(this.model);
+
+        // Re-add wings to the new model
+        this.createWings();
+
+        // Ensure position and rotation are maintained
+        this.model.position.copy(this.position);
+    }
+
     activateLevitation(duration = 3) { // Reduced from 5 to 3 seconds
         this.hasLevitation = true;
         this.levitationTimer = duration;
