@@ -17,6 +17,7 @@ class MultiplayerManager {
             isHost: false
         };
         this.maxPlayers = 8;
+        this.nextColorIndex = 0; // Track next color to assign
 
         // Callbacks
         this.onPlayerUpdate = null;
@@ -65,6 +66,7 @@ class MultiplayerManager {
         this.roomCode = roomCode;
         this.localPlayerData.name = nickname;
         this.localPlayerData.isHost = false;
+        // Color will be assigned based on existing player count after connecting
 
         return this.connectToRoom();
     }
@@ -138,11 +140,23 @@ class MultiplayerManager {
     handlePresenceSync(state) {
         // Update local players map from presence state
         const newPlayers = new Map();
+        let colorIndex = 0;
         for (const key in state) {
             const presences = state[key];
             if (presences.length > 0) {
-                newPlayers.set(key, presences[0]);
+                const playerData = presences[0];
+                // Assign color if not already assigned
+                if (!playerData.color) {
+                    playerData.color = this.playerColors[colorIndex % this.playerColors.length];
+                }
+                newPlayers.set(key, playerData);
+                colorIndex++;
             }
+        }
+
+        // Update local player color if joining
+        if (!this.localPlayerData.color && newPlayers.size > 0) {
+            this.localPlayerData.color = this.playerColors[(newPlayers.size) % this.playerColors.length];
         }
 
         // Trigger joins for anyone new

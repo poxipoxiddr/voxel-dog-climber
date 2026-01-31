@@ -48,6 +48,14 @@ class Game {
         );
         this.camera.position.set(0, 10, 15);
 
+        // Mobile camera zoom out for wider view
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isMobile) {
+            this.camera.position.set(0, 12, 18); // Further back
+            this.camera.fov = 70; // Wider FOV
+            this.camera.updateProjectionMatrix();
+        }
+
         // Renderer
         this.renderer = new THREE.WebGLRenderer({
             canvas: this.canvas,
@@ -222,7 +230,8 @@ class Game {
             multiplayerLobby.classList.add('hidden');
             instructions.classList.remove('hidden');
             roomCreated.classList.add('hidden');
-            roomJoin.classList.add('hidden');
+            document.getElementById('roomJoinInput').classList.add('hidden');
+            document.getElementById('roomCodeInfo').classList.add('hidden');
             document.getElementById('lobbyNickname').classList.remove('hidden');
             Multiplayer.destroy();
         });
@@ -231,32 +240,13 @@ class Game {
         createRoomBtn.addEventListener('click', async () => {
             const nickname = document.getElementById('lobbyNameInput').value.trim() || '호스트';
             document.getElementById('lobbyNickname').classList.add('hidden');
+            document.getElementById('roomCodeInfo').classList.remove('hidden');
             roomCreated.classList.remove('hidden');
             roomCodeDisplay.textContent = '생성 중...';
 
             try {
                 const code = await Multiplayer.createRoom(nickname);
                 roomCodeDisplay.textContent = code;
-
-                // Setup player join callback
-                Multiplayer.onPlayerJoin = (playerId, playerData) => {
-                    const playerList = document.getElementById('playerList');
-                    const item = document.createElement('div');
-                    item.className = 'player-item';
-                    item.id = 'player-' + playerId;
-                    item.textContent = `🐕 ${playerData.name}`;
-                    playerList.appendChild(item);
-                };
-
-                Multiplayer.onPlayerLeave = (playerId) => {
-                    const remotePlayer = this.remotePlayers.get(playerId);
-                    if (remotePlayer) {
-                        remotePlayer.destroy();
-                        this.remotePlayers.delete(playerId);
-                    }
-                    const item = document.getElementById('player-' + playerId);
-                    if (item) item.remove();
-                };
             } catch (err) {
                 roomCodeDisplay.textContent = '오류 발생';
                 console.error(err);
@@ -266,8 +256,9 @@ class Game {
         // Join room
         joinRoomBtn.addEventListener('click', () => {
             document.getElementById('lobbyNickname').classList.add('hidden');
-            roomJoin.classList.remove('hidden');
-            joinStatus.textContent = '';
+            document.getElementById('roomJoinInput').classList.remove('hidden');
+            document.getElementById('roomCodeInfo').classList.remove('hidden');
+            document.getElementById('joinStatus').textContent = '';
         });
 
         // Confirm join

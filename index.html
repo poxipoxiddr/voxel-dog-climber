@@ -128,23 +128,27 @@
                 </div>
             </div>
 
-            <!-- Step 2a: Room Created (Host) -->
-            <div id="roomCreated" class="room-info hidden">
-                <h2>방 코드</h2>
-                <div class="room-code" id="roomCodeDisplay">----</div>
-                <p class="room-hint">친구에게 이 코드를 공유하세요!</p>
-                <div class="player-list" id="playerList">
-                    <div class="player-item host">🐕 호스트 (나)</div>
-                </div>
-                <button id="startMultiBtn" class="start-button">게임 시작</button>
-            </div>
-
-            <!-- Step 2b: Join Room (Guest) -->
-            <div id="roomJoin" class="room-info hidden">
+            <!-- Step 2a: Join Room Input (Guest) -->
+            <div id="roomJoinInput" class="room-info hidden">
                 <h2>방 참가</h2>
                 <input type="text" id="roomCodeInput" class="room-input" placeholder="4자리 코드" maxlength="4">
                 <button id="confirmJoinBtn" class="start-button">참가</button>
                 <div id="joinStatus" class="join-status"></div>
+            </div>
+
+            <!-- Step 2b: Room Code Display (Shared) -->
+            <div id="roomCodeInfo" class="room-info hidden">
+                <h2>방 코드</h2>
+                <div class="room-code" id="roomCodeDisplay">----</div>
+                <p class="room-hint">친구에게 이 코드를 공유하세요!</p>
+            </div>
+
+            <!-- Step 2c: Player List and Start (Host only) -->
+            <div id="roomCreated" class="room-info hidden">
+                <div class="player-list" id="playerList">
+                    <div class="player-item host">🐕 호스트 (나)</div>
+                </div>
+                <button id="startMultiBtn" class="start-button">게임 시작</button>
             </div>
 
             <button id="backToMenuBtn" class="back-btn">← 메뉴로</button>
