@@ -216,11 +216,12 @@ class Rocket {
         if (distance < 4) {
             // EXTREME HORIZONTAL KNOCKBACK!
             const pushDir = player.position.x > this.position.x ? 1 : -1;
-            player.velocity.x += pushDir * this.explosionForce;
+            player.externalVelocity.x += pushDir * (this.explosionForce / 50);
             // Purely horizontal - no upward push
         }
 
         // Massive explosion effect
+        AudioSystem.playExplosion();
         Effects.createParticleBurst(this.scene, this.position, 0xFF3333, 40);
 
         // Add fire particles

@@ -21,9 +21,9 @@ class BubbleManager {
         this.bubbles = this.bubbles.filter(bubble => {
             bubble.update(delta, this.player);
 
-            // Remove if too far from player or popped
+            // Culling: Remove if too far from player or popped
             const distanceFromPlayer = Math.abs(bubble.position.y - playerY);
-            if (distanceFromPlayer > 40 || !bubble.isAlive) {
+            if (bubble.position.y < playerY - 35 || distanceFromPlayer > 60 || !bubble.isAlive) {
                 this.scene.remove(bubble.mesh);
                 return false;
             }
@@ -97,7 +97,8 @@ class Bubble {
         const bubble = new THREE.Group();
 
         // Main bubble (transparent sphere-like)
-        const bubbleGeometry = new THREE.SphereGeometry(1.2, 16, 16);
+        // Optimized: Reduced segments from 16 to 8
+        const bubbleGeometry = new THREE.SphereGeometry(1.2, 8, 8);
         const bubbleMaterial = new THREE.MeshPhongMaterial({
             color: 0x88CCFF,
             transparent: true,
@@ -109,7 +110,8 @@ class Bubble {
         bubble.add(bubbleMesh);
 
         // Inner glow
-        const glowGeometry = new THREE.SphereGeometry(1.0, 16, 16);
+        // Optimized: Reduced segments from 16 to 8
+        const glowGeometry = new THREE.SphereGeometry(1.0, 8, 8);
         const glowMaterial = new THREE.MeshBasicMaterial({
             color: 0xAADDFF,
             transparent: true,
@@ -119,7 +121,8 @@ class Bubble {
         bubble.add(glow);
 
         // Shine highlight
-        const shineGeometry = new THREE.SphereGeometry(0.3, 8, 8);
+        // Optimized: Replaced Sphere with Box for shine
+        const shineGeometry = new THREE.BoxGeometry(0.3, 0.3, 0.3);
         const shineMaterial = new THREE.MeshBasicMaterial({
             color: 0xFFFFFF,
             transparent: true,
@@ -199,11 +202,12 @@ class Bubble {
         if (distance < 3) {
             // STRONG HORIZONTAL KNOCKBACK ONLY!
             const pushDir = player.position.x > this.position.x ? 1 : -1;
-            player.velocity.x += pushDir * this.popForce;
+            player.externalVelocity.x += pushDir * (this.popForce / 50);
             // No upward push - purely horizontal
         }
 
         // Pop effect
+        AudioSystem.playPop();
         Effects.createParticleBurst(this.scene, this.position, 0x88CCFF, 25);
 
         // Add extra sparkle particles

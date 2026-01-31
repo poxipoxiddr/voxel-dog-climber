@@ -20,8 +20,9 @@ class HamsterManager {
         this.hamsters = this.hamsters.filter(hamster => {
             hamster.update(delta, this.player);
 
-            // Remove if too far below player
-            if (hamster.position.y < playerY - 50) {
+            // Culling: Remove if too far below player
+            const distanceFromPlayer = Math.abs(hamster.position.y - playerY);
+            if (hamster.position.y < playerY - 35 || distanceFromPlayer > 60) {
                 this.scene.remove(hamster.mesh);
                 return false;
             }
@@ -93,6 +94,10 @@ class Hamster {
         // Knockback
         this.pushForce = 400; // 2x increased (was 200)
 
+        // Shadow
+        this.shadow = VoxelModels.createBlobShadow();
+        this.scene.add(this.shadow);
+
         this.scene.add(this.mesh);
     }
 
@@ -100,7 +105,8 @@ class Hamster {
         const hamster = new THREE.Group();
 
         // Main ball (hamster in ball)
-        const ballGeometry = new THREE.SphereGeometry(0.6, 16, 16);
+        // Optimized: Reduced segments from 16 to 8
+        const ballGeometry = new THREE.SphereGeometry(0.6, 8, 8);
         const ballMaterial = new THREE.MeshPhongMaterial({
             color: 0xFFE4B5, // Beige/tan color
             transparent: true,
@@ -111,7 +117,8 @@ class Hamster {
         hamster.add(ball);
 
         // Hamster body inside (brown)
-        const bodyGeometry = new THREE.SphereGeometry(0.4, 12, 12);
+        // Optimized: Reduced segments from 12 to 6
+        const bodyGeometry = new THREE.SphereGeometry(0.4, 6, 6);
         const bodyMaterial = new THREE.MeshPhongMaterial({
             color: 0x8B4513 // Brown
         });
@@ -120,7 +127,8 @@ class Hamster {
         hamster.add(body);
 
         // Head (lighter brown)
-        const headGeometry = new THREE.SphereGeometry(0.25, 10, 10);
+        // Optimized: Reduced segments from 10 to 6
+        const headGeometry = new THREE.SphereGeometry(0.25, 6, 6);
         const headMaterial = new THREE.MeshPhongMaterial({
             color: 0xA0522D
         });
@@ -129,7 +137,8 @@ class Hamster {
         hamster.add(head);
 
         // Ears (small)
-        const earGeometry = new THREE.SphereGeometry(0.1, 8, 8);
+        // Optimized: Reduced segments from 8 to 4
+        const earGeometry = new THREE.SphereGeometry(0.1, 4, 4);
         const earMaterial = new THREE.MeshPhongMaterial({
             color: 0xFFA07A
         });
@@ -143,7 +152,8 @@ class Hamster {
         hamster.add(rightEar);
 
         // Eyes (black dots)
-        const eyeGeometry = new THREE.SphereGeometry(0.05, 6, 6);
+        // Optimized: Replaced Sphere with Box for eyes (minimalistic)
+        const eyeGeometry = new THREE.BoxGeometry(0.08, 0.08, 0.08);
         const eyeMaterial = new THREE.MeshBasicMaterial({
             color: 0x000000
         });
@@ -170,6 +180,13 @@ class Hamster {
         this.position.y += this.velocity.y * delta;
         this.mesh.position.copy(this.position);
 
+        // Update shadow
+        if (this.shadow) {
+            this.shadow.position.x = this.position.x;
+            this.shadow.position.z = this.position.z;
+            this.shadow.position.y = this.position.y - 0.5; // Follow closely for simple objects
+        }
+
         // Roll animation (based on falling speed)
         this.rollSpeed += delta * Math.abs(this.velocity.y) * 0.5;
         this.mesh.rotation.z = this.rollSpeed;
@@ -185,14 +202,18 @@ class Hamster {
         if (distance < 1.5) {
             // STRONG HORIZONTAL KNOCKBACK!
             const pushDir = player.position.x > this.position.x ? 1 : -1;
-            player.velocity.x += pushDir * this.pushForce;
+            player.externalVelocity.x += pushDir * (this.pushForce / 50); // Scale down force for direct addition
             // No upward push - purely horizontal
+
+            // Sound effect
+            AudioSystem.playHit();
 
             // Particle effect
             Effects.createParticleBurst(this.scene, this.position, 0x8B4513, 15);
 
             // Remove this hamster
             this.scene.remove(this.mesh);
+            if (this.shadow) this.scene.remove(this.shadow);
             return false;
         }
 

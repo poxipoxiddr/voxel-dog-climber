@@ -39,10 +39,11 @@ class EnemyManager {
         this.enemies = this.enemies.filter(enemy => {
             enemy.update(delta, this.player);
 
-            // Remove if off-screen (memory optimization)
+            // Culling: Remove if off-screen (memory optimization)
             const distanceFromPlayer = Math.abs(enemy.position.y - playerY);
-            if (distanceFromPlayer > 30 || !enemy.isAlive) {
+            if (enemy.position.y < playerY - 35 || distanceFromPlayer > 60 || !enemy.isAlive) {
                 this.scene.remove(enemy.mesh);
+                if (enemy.shadow) this.scene.remove(enemy.shadow);
                 return false;
             }
 
@@ -101,6 +102,11 @@ class Pigeon {
         this.speed = 8;
         this.pushForce = 240; // 2x increased (was 120)
 
+        // Shadow
+        this.shadow = VoxelModels.createBlobShadow();
+        this.shadow.scale.setScalar(0.8);
+        this.scene.add(this.shadow);
+
         this.scene.add(this.mesh);
     }
 
@@ -152,10 +158,18 @@ class Pigeon {
         const distance = this.position.distanceTo(player.position);
         if (distance < 1.5) {
             // Push player horizontally only
-            player.velocity.x += this.direction * this.pushForce;
+            player.externalVelocity.x += this.direction * (this.pushForce / 50);
             // No upward push - purely horizontal knockback
+            AudioSystem.playHit();
             Effects.createParticleBurst(this.scene, this.position, 0x808080, 10);
             this.isAlive = false;
+        }
+
+        // Update shadow
+        if (this.shadow) {
+            this.shadow.position.x = this.position.x;
+            this.shadow.position.y = this.position.y - 0.5;
+            this.shadow.position.z = this.position.z;
         }
 
         // Remove if too far
@@ -190,6 +204,11 @@ class Cat {
         this.velocity = new THREE.Vector3(-side * 3, -5, 0);
         this.gravity = -20;
         this.pushForce = 200; // 2x increased (was 100)
+
+        // Shadow
+        this.shadow = VoxelModels.createBlobShadow();
+        this.shadow.scale.setScalar(0.7);
+        this.scene.add(this.shadow);
 
         this.scene.add(this.mesh);
     }
@@ -243,13 +262,21 @@ class Cat {
         if (distance < 1.5) {
             // Push player horizontally only
             const pushDir = player.position.x > this.position.x ? 1 : -1;
-            player.velocity.x += pushDir * this.pushForce;
+            player.externalVelocity.x += pushDir * (this.pushForce / 50);
             // No upward push - purely horizontal knockback
 
             // Apply 0.3s stun
             player.applyStun(0.3);
+            AudioSystem.playHit();
             Effects.createParticleBurst(this.scene, this.position, 0xFF8C00, 12);
             this.isAlive = false;
+        }
+
+        // Update shadow
+        if (this.shadow) {
+            this.shadow.position.x = this.position.x;
+            this.shadow.position.y = this.position.y - 0.5;
+            this.shadow.position.z = this.position.z;
         }
 
         // Remove if fell too far
@@ -286,6 +313,11 @@ class Panda {
         this.speed = 12; // Faster than pigeon
         this.rollSpeed = 0;
         this.pushForce = 200; // 4x INSANELY STRONG (BOSS)
+
+        // Shadow
+        this.shadow = VoxelModels.createBlobShadow();
+        this.shadow.scale.setScalar(1.5);
+        this.scene.add(this.shadow);
 
         this.scene.add(this.mesh);
     }
@@ -352,10 +384,18 @@ class Panda {
         const distance = this.position.distanceTo(player.position);
         if (distance < 2) {
             // MASSIVE horizontal push only! (BOSS)
-            player.velocity.x += this.direction * this.pushForce;
+            player.externalVelocity.x += this.direction * (this.pushForce / 50);
             // No upward push - purely horizontal blast
+            AudioSystem.playHit();
             Effects.createParticleBurst(this.scene, this.position, 0x000000, 20);
             this.isAlive = false;
+        }
+
+        // Update shadow
+        if (this.shadow) {
+            this.shadow.position.x = this.position.x;
+            this.shadow.position.y = this.position.y - 1;
+            this.shadow.position.z = this.position.z;
         }
 
         // Remove if too far

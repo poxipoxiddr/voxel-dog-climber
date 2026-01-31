@@ -27,28 +27,28 @@ const VoxelModels = {
     createDog() {
         const dog = new THREE.Group();
 
-        // Body (main torso)
-        const body = this.createVoxel(0xD4A574, 1.5);
+        // Body (main torso) - Darker Brown
+        const body = this.createVoxel(0x8B5E3C, 1.5);
         body.position.y = 0;
         dog.add(body);
 
         // Head
-        const head = this.createVoxel(0xD4A574, 1.2);
+        const head = this.createVoxel(0x8B5E3C, 1.2);
         head.position.set(0, 0.5, 0.8);
         dog.add(head);
 
-        // Snout
-        const snout = this.createVoxel(0xC89A6B, 0.6);
+        // Snout - Darker Tan
+        const snout = this.createVoxel(0xA0785D, 0.6);
         snout.position.set(0, 0.3, 1.3);
         dog.add(snout);
 
-        // Ears (floppy)
-        const leftEar = this.createVoxel(0xB8845C, 0.5);
+        // Ears (floppy) - Richer Dark Brown
+        const leftEar = this.createVoxel(0x5D4037, 0.5);
         leftEar.position.set(-0.4, 0.8, 0.8);
         leftEar.rotation.z = -0.3;
         dog.add(leftEar);
 
-        const rightEar = this.createVoxel(0xB8845C, 0.5);
+        const rightEar = this.createVoxel(0x5D4037, 0.5);
         rightEar.position.set(0.4, 0.8, 0.8);
         rightEar.rotation.z = 0.3;
         dog.add(rightEar);
@@ -76,14 +76,14 @@ const VoxelModels = {
         ];
 
         legPositions.forEach(pos => {
-            const leg = this.createVoxel(0xD4A574, 0.4);
+            const leg = this.createVoxel(0x8B5E3C, 0.4);
             leg.scale.y = 1.5;
             leg.position.set(pos[0], pos[1], pos[2]);
             dog.add(leg);
         });
 
         // Tail
-        const tail = this.createVoxel(0xD4A574, 0.5);
+        const tail = this.createVoxel(0x8B5E3C, 0.5);
         tail.scale.y = 1.2;
         tail.position.set(0, 0.2, -1);
         tail.rotation.x = 0.5;
@@ -208,5 +208,25 @@ const VoxelModels = {
         const geometry = new THREE.SphereGeometry(0.1, 8, 8);
         const material = new THREE.MeshBasicMaterial({ color: color });
         return new THREE.Mesh(geometry, material);
+    },
+
+    // Create a "Blob Shadow" (Fake shadow for mobile optimization)
+    createBlobShadow() {
+        const geometry = new THREE.PlaneGeometry(1, 1);
+        const material = new THREE.MeshBasicMaterial({
+            color: 0x000000,
+            transparent: true,
+            opacity: 0.3,
+            side: THREE.DoubleSide
+        });
+
+        // Use a simple circle shape for the plane
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.rotation.x = -Math.PI / 2;
+        mesh.position.y = -0.5; // Slightly below the owner
+
+        // Create a circular appearance (simplest way without texture)
+        // Or if we can't use complex shaders, just a small square/circle mesh works well in voxel style
+        return mesh;
     }
 };

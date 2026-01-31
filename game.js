@@ -23,7 +23,11 @@ class Game {
     setupThreeJS() {
         // Scene
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0x87CEEB); // Sky blue
+        const skyColor = 0x87CEEB;
+        this.scene.background = new THREE.Color(skyColor); // Sky blue
+
+        // Add Exponential Fog for depth (Optimized for performance)
+        this.scene.fog = new THREE.FogExp2(skyColor, 0.015);
 
         // Camera
         this.camera = new THREE.PerspectiveCamera(
@@ -40,9 +44,8 @@ class Game {
             antialias: true
         });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.renderer.setPixelRatio(window.devicePixelRatio);
-        this.renderer.shadowMap.enabled = true;
-        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Cap pixel ratio for performance
+        this.renderer.shadowMap.enabled = false; // Disable real-time shadows for mobile performance
 
         // Handle resize
         window.addEventListener('resize', () => {
@@ -131,6 +134,7 @@ class Game {
         startBtn.addEventListener('click', () => {
             instructions.classList.add('hidden');
             this.startGame();
+            AudioSystem.startBGM();
         });
 
         restartBtn.addEventListener('click', () => {
@@ -167,6 +171,7 @@ class Game {
 
         const gameOverScreen = document.getElementById('gameOver');
         gameOverScreen.classList.remove('hidden');
+        AudioSystem.playGameOver();
     }
 
     update() {
@@ -189,7 +194,10 @@ class Game {
         this.bubbleManager.update(delta, this.player.position.y, this.mapGenerator.getPlatforms());
         this.rocketManager.update(delta, this.player.position.y, this.mapGenerator.getPlatforms());
         this.hamsterManager.update(delta, this.player.position.y, this.mapGenerator.getPlatforms());
-        this.scoring.update(this.player.getAltitude());
+        const milestoneReached = this.scoring.update(this.player.getAltitude());
+        if (milestoneReached) {
+            this.player.activateSuperJump(5);
+        }
 
         Effects.update(delta, this.scene);
         CameraController.update();

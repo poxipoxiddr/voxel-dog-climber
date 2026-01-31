@@ -49,8 +49,8 @@ class ItemManager {
                 return false;
             }
 
-            // Remove if too far below player
-            if (item.mesh.position.y < playerY - 20) {
+            // Culling: Remove if too far below player
+            if (item.mesh.position.y < playerY - 35) {
                 this.scene.remove(item.mesh);
                 return false;
             }
@@ -94,6 +94,8 @@ class ItemManager {
             item.type === 'bone' ? 0xFFD700 : 0x10b981,
             20
         );
+
+        AudioSystem.playCollect();
 
         // Apply effect
         if (item.type === 'bone') {

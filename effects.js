@@ -125,21 +125,37 @@ const CameraController = {
 
     init(camera) {
         this.camera = camera;
+        this.baseFOV = camera.fov;
+        this.targetFOV = camera.fov;
+        this.baseOffset = new THREE.Vector3(0, 8, 12);
+        this.targetOffset = this.baseOffset.clone();
     },
 
     setTarget(target) {
         this.target = target;
     },
 
+    setSpeedEffect(active) {
+        if (active) {
+            this.targetFOV = 85; // Wide angle
+            this.targetOffset.set(0, 5, 18); // Further back, camera lower
+        } else {
+            this.targetFOV = this.baseFOV;
+            this.targetOffset.copy(this.baseOffset);
+        }
+    },
+
     update() {
         if (!this.target || !this.camera) return;
 
         // Desired camera position (behind and above the player)
-        const targetPosition = new THREE.Vector3(
-            this.target.position.x,
-            this.target.position.y + 8,
-            this.target.position.z + 12
-        );
+        const targetPosition = this.target.position.clone().add(this.targetOffset);
+
+        // Lerp FOV
+        if (this.camera.fov !== this.targetFOV) {
+            this.camera.fov = THREE.MathUtils.lerp(this.camera.fov, this.targetFOV, 0.1);
+            this.camera.updateProjectionMatrix();
+        }
 
         // Smooth follow
         this.currentPosition.lerp(targetPosition, this.smoothness);

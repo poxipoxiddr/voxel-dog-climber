@@ -7,6 +7,7 @@ class ScoringSystem {
         this.score = 0;
         this.highScore = this.loadHighScore();
         this.maxAltitude = 0;
+        this.lastMilestone = 0;
 
         this.scoreElement = document.getElementById('score');
         this.altitudeElement = document.getElementById('altitude');
@@ -30,6 +31,13 @@ class ScoringSystem {
         }
 
         this.updateDisplay();
+
+        // Check for 1000pt milestone
+        if (Math.floor(this.score / 1000) > Math.floor(this.lastMilestone / 1000)) {
+            this.lastMilestone = this.score;
+            return true; // Milestone hit!
+        }
+        return false;
     }
 
     updateDisplay() {
@@ -58,6 +66,7 @@ class ScoringSystem {
     reset() {
         this.score = 0;
         this.maxAltitude = 0;
+        this.lastMilestone = 0;
         this.updateDisplay();
     }
 }
