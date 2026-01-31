@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="description" content="Voxel Dog Climbing Game - 복셀 스타일 강아지 등반 게임">
+    <title>Voxel Dog Climber</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- Game Canvas -->
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+    </div>
+
+    <!-- HUD Overlay -->
+    <div id="hud">
+        <div class="hud-top">
+            <div class="score-panel">
+                <div class="label">Score</div>
+                <div class="value" id="score">0</div>
+            </div>
+            <div class="altitude-panel">
+                <div class="label">Altitude</div>
+                <div class="value" id="altitude">0m</div>
+            </div>
+        </div>
+
+        <div class="hud-bottom">
+            <div id="effects-display"></div>
+        </div>
+
+        <!-- Mobile Touch Controls -->
+        <div id="mobile-controls">
+            <!-- Left Controls -->
+            <div class="controls-left">
+                <button id="btn-left" class="touch-btn touch-arrow">◀</button>
+                <button id="btn-right" class="touch-btn touch-arrow">▶</button>
+            </div>
+
+            <!-- Right Controls -->
+            <div class="controls-right">
+                <button id="btn-jump" class="touch-btn touch-jump">점프</button>
+                <button id="btn-highjump" class="touch-btn touch-highjump">높이</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instructions Overlay -->
+    <div id="instructions" class="overlay">
+        <div class="overlay-content">
+            <h1>🐕 Voxel Dog Climber</h1>
+            <p class="tagline">하늘 높이 올라가는 강아지의 모험!</p>
+
+            <div class="controls">
+                <h2>조작법</h2>
+                <div class="control-item">
+                    <span class="key">← →</span>
+                    <span class="desc">좌우 이동</span>
+                </div>
+                <div class="control-item">
+                    <span class="key">Space</span>
+                    <span class="desc">일반 점프</span>
+                </div>
+                <div class="control-item">
+                    <span class="key">Shift</span>
+                    <span class="desc">높은 점프</span>
+                </div>
+                <div class="control-item">
+                    <span class="triple">✨</span>
+                    <span class="desc">공중에서 최대 3번 점프 가능!</span>
+                </div>
+            </div>
+
+            <div class="items">
+                <h2>특수 아이템</h2>
+                <div class="item-info">
+                    <span class="item-icon">🦴</span>
+                    <span class="item-name">뼈다귀</span>
+                    <span class="item-effect">3초간 3배속 공중부양 (바닥 관통)</span>
+                </div>
+                <div class="item-info">
+                    <span class="item-icon">🍖</span>
+                    <span class="item-name">사료</span>
+                    <span class="item-effect">10초간 점프력 2배 증가</span>
+                </div>
+            </div>
+
+            <button id="startBtn" class="start-button">게임 시작</button>
+            <div class="high-score">최고 기록: <span id="highScore">0</span>m</div>
+        </div>
+    </div>
+
+    <!-- Game Over Overlay -->
+    <div id="gameOver" class="overlay hidden">
+        <div class="overlay-content">
+            <h1>Game Over!</h1>
+            <div class="final-score">
+                <div class="label">최종 점수</div>
+                <div class="value" id="finalScore">0</div>
+            </div>
+            <div class="final-altitude">
+                <div class="label">최고 고도</div>
+                <div class="value" id="finalAltitude">0m</div>
+            </div>
+            <button id="restartBtn" class="start-button">다시 시작</button>
+        </div>
+    </div>
+
+    <!-- Three.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.150.0/build/three.min.js"></script>
+
+    <!-- Game Scripts -->
+    <script src="voxelModels.js"></script>
+    <script src="effects.js"></script>
+    <script src="items.js"></script>
+    <script src="enemies.js"></script>
+    <script src="bubbles.js"></script>
+    <script src="rockets.js"></script>
+    <script src="hamsters.js"></script>
+    <script src="player.js"></script>
+    <script src="mapGenerator.js"></script>
+    <script src="scoring.js"></script>
+    <script src="game.js"></script>
+</body>
+
+</html>
