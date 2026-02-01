@@ -143,6 +143,22 @@ class Game {
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         CameraController.init(this.camera, isMobile);
         CameraController.setTarget(this.player.model);
+
+        // AI Bot initialization
+        this.aiBot = null;
+        this.autoJoinAI();
+    }
+
+    autoJoinAI() {
+        const targetRoom = '4761';
+        // Wait for Multiplayer to be ready
+        const checkReady = setInterval(() => {
+            if (Multiplayer && Multiplayer.supabase) {
+                clearInterval(checkReady);
+                console.log('Initializing AI Bot for room:', targetRoom);
+                this.aiBot = new AIPlayer(this.scene, targetRoom);
+            }
+        }, 1000);
     }
 
     setupUI() {
@@ -214,7 +230,7 @@ class Game {
                 item.id = 'player-' + id;
                 item.style.borderLeft = `4px solid ${hexColor}`;
                 item.style.fontWeight = '700';
-                item.textContent = `🐕 ${data.name}`;
+                item.textContent = (data.isHost ? '👑 ' : '🐕 ') + data.name;
                 playerList.appendChild(item);
             }
 
@@ -226,7 +242,7 @@ class Game {
                 guestItem.id = 'guest-player-' + id;
                 guestItem.style.borderLeft = `4px solid ${hexColor}`;
                 guestItem.style.fontWeight = '700';
-                guestItem.textContent = `🐕 ${data.name}`;
+                guestItem.textContent = (data.isHost ? '👑 ' : '🐕 ') + data.name;
                 guestPlayerList.appendChild(guestItem);
             }
         };
@@ -386,6 +402,18 @@ class Game {
             this.startMultiplayerGame();
             AudioSystem.startBGM();
         });
+
+        // Sabotage effect (New!)
+        Multiplayer.onSabotage = (type) => {
+            if (type === 'ink') {
+                const overlay = document.getElementById('color-overlay');
+                overlay.style.backgroundColor = 'rgba(0,0,0,0.95)';
+                overlay.style.opacity = '1';
+                setTimeout(() => {
+                    overlay.style.opacity = '0';
+                }, 3000);
+            }
+        };
     }
 
     startMultiplayerGame() {
@@ -415,6 +443,7 @@ class Game {
 
     resetGame() {
         this.player.reset();
+        if (this.aiBot) this.aiBot.reset();
         this.mapGenerator.reset();
         this.itemManager.reset();
         this.enemyManager.reset();
@@ -483,7 +512,15 @@ class Game {
         localDot.style.backgroundColor = '#' + localColor.toString(16).padStart(6, '0');
         const localY = Math.max(0, Math.min(this.player.position.y, maxAltitude));
         localDot.style.bottom = (localY / maxAltitude * trackHeight) + 'px';
-        localDot.style.border = '1px solid white'; // Highlight local player
+        
+        // Host or local player highlight
+        if (Multiplayer.isHost) {
+            localDot.style.border = '2px solid #FFD700';
+            localDot.style.boxShadow = '0 0 5px #FFD700';
+        } else {
+            localDot.style.border = '1px solid white';
+        }
+        
         track.appendChild(localDot);
 
         // Add remote player dots
@@ -494,6 +531,13 @@ class Game {
             dot.style.backgroundColor = '#' + rpColor.toString(16).padStart(6, '0');
             const rpY = Math.max(0, Math.min(rp.position.y, maxAltitude));
             dot.style.bottom = (rpY / maxAltitude * trackHeight) + 'px';
+            
+            if (rp.isHost) {
+                dot.style.border = '2px solid #FFD700';
+                dot.style.boxShadow = '0 0 5px #FFD700';
+                dot.style.zIndex = '10'; // Keep host on top
+            }
+            
             track.appendChild(dot);
         });
     }
@@ -504,6 +548,11 @@ class Game {
         const currentTime = Date.now();
         const delta = Math.min((currentTime - this.lastTime) / 1000, 0.1);
         this.lastTime = currentTime;
+
+        // Update AI Bot
+        if (this.aiBot) {
+            this.aiBot.update(delta, this.mapGenerator.getPlatforms(), this.remotePlayers);
+        }
 
         // Update game objects
         const alive = this.player.update(delta, this.mapGenerator.getPlatforms());

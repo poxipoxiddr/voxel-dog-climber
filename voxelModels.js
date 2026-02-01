@@ -172,6 +172,60 @@ const VoxelModels = {
         return bone;
     },
 
+    // Create Golden Treat (New!)
+    createTreat() {
+        const treat = this.createBone();
+        // Change glow to orange
+        treat.userData.glow.material.color.setHex(0xFFA500);
+        return treat;
+    },
+
+    // Create Ink Pot (New!)
+    createInkPot() {
+        const pot = new THREE.Group();
+        const base = this.createVoxel(0x333333, 0.8);
+        pot.add(base);
+        const glowGeometry = new THREE.SphereGeometry(1.0, 16, 16);
+        const glowMaterial = new THREE.MeshBasicMaterial({
+            color: 0x000000,
+            transparent: true,
+            opacity: 0.4
+        });
+        const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+        pot.add(glow);
+        pot.userData.glow = glow;
+        return pot;
+    },
+
+    // Create Giant Hamster (New!)
+    createGiantHamster() {
+        const hamster = new THREE.Group();
+        hamster.scale.setScalar(5); // HUGE
+
+        // Ball
+        const ballGeom = new THREE.SphereGeometry(0.6, 16, 16);
+        const ballMat = new THREE.MeshPhongMaterial({
+            color: 0xFF0000,
+            transparent: true,
+            opacity: 0.4,
+            shininess: 120
+        });
+        const ball = new THREE.Mesh(ballGeom, ballMat);
+        hamster.add(ball);
+
+        // Body
+        const body = this.createVoxel(0x8B4513, 0.4);
+        body.scale.set(1.2, 1, 1.2);
+        hamster.add(body);
+
+        // Crown
+        const crown = this.createVoxel(0xFFD700, 0.3);
+        crown.position.set(0, 0.4, 0);
+        hamster.add(crown);
+
+        return hamster;
+    },
+
     // Create dog food bowl item
     createFoodBowl() {
         const bowl = new THREE.Group();

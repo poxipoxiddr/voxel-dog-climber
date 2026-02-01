@@ -16,7 +16,7 @@ class MultiplayerManager {
             position: { x: 0, y: 2, z: 0 },
             isHost: false
         };
-        this.maxPlayers = 8;
+        this.maxPlayers = 16;
         this.nextColorIndex = 0; // Track next color to assign
 
         // Callbacks
@@ -26,16 +26,26 @@ class MultiplayerManager {
         this.onGameStart = null;
         this.onPlayerWin = null;
 
+        // Rainbow colors for guests
         this.playerColors = [
-            0xFF4D4D, // Vibrant Red
-            0x4DFF4D, // Vibrant Green
-            0x4D4DFF, // Vibrant Blue
-            0xFFFF4D, // Vibrant Yellow
-            0xFF4DFF, // Vibrant Pink/Magenta
-            0x4DFFFF, // Vibrant Cyan
-            0xFFA64D, // Vibrant Orange
-            0xB34DFF  // Vibrant Purple
+            0xFF4D4D, // Red
+            0xFF914D, // Orange
+            0xFFD74D, // Yellow
+            0xBEFF4D, // Lime
+            0x4DFF4D, // Green
+            0x4DFFBE, // Aquamarine
+            0x4DFFFF, // Cyan
+            0x4D91FF, // Sky Blue
+            0x4D4DFF, // Blue
+            0x914DFF, // Indigo
+            0xBE4DFF, // Violet
+            0xFF4DFF, // Pink
+            0xFF4D91, // Rose
+            0xFFFFFF, // White
+            0xAAAAAA, // Grey
+            0x555555  // Dark Grey
         ];
+        this.hostColor = 0xFFD700; // Special Gold for Host
     }
 
     // Initialize Supabase (User needs to provide URL and Anon Key)
@@ -55,7 +65,7 @@ class MultiplayerManager {
         this.roomCode = Math.floor(1000 + Math.random() * 9000).toString();
         this.localPlayerData.name = nickname;
         this.localPlayerData.isHost = true;
-        this.localPlayerData.color = this.playerColors[0];
+        this.localPlayerData.color = this.hostColor;
 
         return this.connectToRoom();
     }
@@ -125,6 +135,11 @@ class MultiplayerManager {
                         if (this.onPlayerWin) this.onPlayerWin(payload.playerId, payload.name);
                     }
                 })
+                .on('broadcast', { event: 'sabotage' }, ({ payload }) => {
+                    if (payload.attackerId !== this.localPlayerId) {
+                        if (this.onSabotage) this.onSabotage(payload.type);
+                    }
+                })
                 .subscribe(async (status) => {
                     if (status === 'SUBSCRIBED') {
                         // For non-hosts, get current presence state first to determine color
@@ -156,16 +171,22 @@ class MultiplayerManager {
             const presences = state[key];
             if (presences.length > 0) {
                 const playerData = presences[0];
-                // Assign color if not already assigned - use index for sequential colors
-                if (!playerData.color) {
+                
+                // Assign/Enforce colors based on role and order
+                if (playerData.isHost) {
+                    playerData.color = this.hostColor;
+                } else {
+                    // Find guest index (host might be anywhere in sortedKeys)
+                    // We use index for guests, but we could skip the host's index to be cleaner
                     playerData.color = this.playerColors[index % this.playerColors.length];
                 }
+                
                 newPlayers.set(key, playerData);
             }
         });
 
-        // Update local player color if joining (assign based on current position in the list)
-        if (!this.localPlayerData.color && newPlayers.size > 0) {
+        // Update local player color if not host (host color is already set)
+        if (!this.isHost && newPlayers.size > 0) {
             const localIndex = sortedKeys.indexOf(this.localPlayerId);
             if (localIndex !== -1) {
                 this.localPlayerData.color = this.playerColors[localIndex % this.playerColors.length];
@@ -230,6 +251,18 @@ class MultiplayerManager {
             payload: {
                 playerId: this.localPlayerId,
                 name: this.localPlayerData.name
+            }
+        });
+    }
+
+    broadcastSabotage(type) {
+        if (!this.channel) return;
+        this.channel.send({
+            type: 'broadcast',
+            event: 'sabotage',
+            payload: {
+                attackerId: this.localPlayerId,
+                type: type
             }
         });
     }

@@ -14,3 +14,4 @@ Thumbs.db
 .git/
 .vercel
 .env*.local
+deploy-log.txt

@@ -17,6 +17,11 @@ class Player {
         // Create wings (hidden by default)
         this.createWings();
 
+        // Costume hat (New!)
+        this.currentHat = null;
+        this.treatCount = parseInt(localStorage.getItem('treatCount') || '0');
+        this.updateCostume();
+
         // Physics properties
         this.position = new THREE.Vector3(0, 2, 0);
         this.velocity = new THREE.Vector3(0, 0, 0);
@@ -495,6 +500,24 @@ class Player {
         this.levitationTimer = duration;
     }
 
+    collectTreat() {
+        this.treatCount++;
+        localStorage.setItem('treatCount', this.treatCount);
+        this.updateCostume();
+    }
+
+    updateCostume() {
+        // Simple costume progression based on treats
+        if (this.treatCount >= 10 && !this.currentHat) {
+            this.currentHat = VoxelModels.createVoxel(0xFFD700, 0.4); // Golden hat
+            this.currentHat.position.set(0, 1.2, 0.8);
+            this.model.add(this.currentHat);
+        } else if (this.treatCount >= 20 && this.currentHat) {
+            this.currentHat.material.color.setHex(0x9400D3); // Purple hat
+            this.currentHat.scale.set(1.2, 0.5, 1.2);
+        }
+    }
+
     activateJumpBoost(duration = 10) {
         this.hasJumpBoost = true;
         this.jumpBoostTimer = duration;
@@ -534,13 +557,14 @@ class RemotePlayer {
         this.id = data.id;
         this.name = data.name || '플레이어';
         this.color = data.color || 0x8B5E3C;
+        this.isHost = data.isHost || false;
 
         // Create dog model with specific color
         this.model = VoxelModels.createDog(this.color);
         this.scene.add(this.model);
 
         // Add nickname label
-        this.label = this.createNameLabel(this.name, this.color);
+        this.label = this.createNameLabel(this.name, this.color, this.isHost);
         this.scene.add(this.label);
 
         this.position = new THREE.Vector3(0, 0, 0);
@@ -551,7 +575,7 @@ class RemotePlayer {
         this.model.position.copy(this.position);
     }
 
-    createNameLabel(name, color) {
+    createNameLabel(name, color, isHost = false) {
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
         canvas.width = 256;
@@ -563,16 +587,20 @@ class RemotePlayer {
         context.roundRect(3, 3, 250, 58, 12); // Slightly inset to avoid clipping
         context.fillStyle = 'rgba(0, 0, 0, 0.7)';
         context.fill();
-        context.strokeStyle = hexColor;
-        context.lineWidth = 6;
+        
+        // Host gets a thicker golden border or specific color border
+        context.strokeStyle = isHost ? '#FFD700' : hexColor;
+        context.lineWidth = isHost ? 10 : 6;
         context.stroke();
 
         // Text
         context.font = 'bold 32px "Outfit", sans-serif';
-        context.fillStyle = 'white';
+        context.fillStyle = isHost ? '#FFD700' : 'white'; // Host name in gold
         context.textAlign = 'center';
         context.textBaseline = 'middle';
-        context.fillText(name, 128, 32);
+        
+        const displayName = isHost ? `👑 ${name}` : name;
+        context.fillText(displayName, 128, 32);
 
         const texture = new THREE.CanvasTexture(canvas);
         const spriteMaterial = new THREE.SpriteMaterial({ map: texture, transparent: true });

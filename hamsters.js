@@ -12,24 +12,64 @@ class HamsterManager {
 
     update(delta, player, platforms) {
         const playerY = player.position.y;
+        
+        // Theme / Background Change (New!)
+        this.updateTheme(playerY);
+
         // Spawn hamster swarms from platform sides
         if (Math.random() < this.spawnChance) {
             this.spawnHamsterSwarm(playerY, platforms);
         }
 
+        // Spawn Boss (New!)
+        if (playerY > 200 && !this.bossSpawned) {
+            this.spawnBoss(playerY);
+        }
+
         // Update all hamsters
         this.hamsters = this.hamsters.filter(hamster => {
-            hamster.update(delta, this.player);
+            const alive = hamster.update(delta, this.player);
+            if (!alive) {
+                this.scene.remove(hamster.mesh);
+                if (hamster.shadow) this.scene.remove(hamster.shadow);
+                if (hamster.isBoss) this.bossSpawned = false;
+                return false;
+            }
 
             // Culling: Remove if too far below player
             const distanceFromPlayer = Math.abs(hamster.position.y - playerY);
-            if (hamster.position.y < playerY - 35 || distanceFromPlayer > 60) {
+            if (hamster.position.y < playerY - 40 || distanceFromPlayer > 100) {
                 this.scene.remove(hamster.mesh);
+                if (hamster.shadow) this.scene.remove(hamster.shadow);
+                if (hamster.isBoss) this.bossSpawned = false;
                 return false;
             }
 
             return true;
         });
+    }
+
+    updateTheme(playerY) {
+        // Change fog and background based on height
+        if (playerY > 500) {
+            this.scene.fog.color.setHex(0x000033); // Space
+            this.scene.background.setHex(0x000033);
+            this.player.gravity = -10; // Low gravity in space!
+        } else if (playerY > 200) {
+            this.scene.fog.color.setHex(0xFF8C00); // Sunset
+            this.scene.background.setHex(0xFF8C00);
+            this.player.gravity = -25;
+        } else {
+            this.scene.fog.color.setHex(0x87CEEB); // Sky
+            this.scene.background.setHex(0x87CEEB);
+            this.player.gravity = -25;
+        }
+    }
+
+    spawnBoss(playerY) {
+        this.bossSpawned = true;
+        const boss = new GiantHamster(this.scene, playerY + 30);
+        this.hamsters.push(boss);
     }
 
     spawnHamsterSwarm(playerY, platforms) {
@@ -216,6 +256,62 @@ class Hamster {
             this.scene.remove(this.mesh);
             if (this.shadow) this.scene.remove(this.shadow);
             return false;
+        }
+
+        return true;
+    }
+}
+
+// ===================================
+// Giant Hamster - Boss Enemy (New!)
+// ===================================
+
+class GiantHamster {
+    constructor(scene, y) {
+        this.scene = scene;
+        this.isBoss = true;
+        this.mesh = VoxelModels.createGiantHamster();
+        this.position = new THREE.Vector3(0, y, 0);
+        this.mesh.position.copy(this.position);
+        this.scene.add(this.mesh);
+        
+        this.velocity = new THREE.Vector3(0, 0, 0);
+        this.targetX = 0;
+        this.stateTimer = 0;
+        this.pushForce = 1000; // Extreme knockback
+        
+        this.shadow = VoxelModels.createBlobShadow();
+        this.shadow.scale.setScalar(4);
+        this.scene.add(this.shadow);
+    }
+
+    update(delta, player) {
+        this.stateTimer -= delta;
+        if (this.stateTimer <= 0) {
+            // Pick a new target X
+            this.targetX = (Math.random() - 0.5) * 20;
+            this.stateTimer = 2;
+        }
+
+        // Move towards target X
+        this.position.x = THREE.MathUtils.lerp(this.position.x, this.targetX, delta * 2);
+        
+        // Slowly sink
+        this.position.y -= delta * 2;
+        this.mesh.position.copy(this.position);
+
+        if (this.shadow) {
+            this.shadow.position.set(this.position.x, this.position.y - 3, this.position.z);
+        }
+
+        // Collision
+        const distance = this.position.distanceTo(player.position);
+        if (distance < 4) {
+            const pushDir = player.position.x > this.position.x ? 1 : -1;
+            player.externalVelocity.x += pushDir * 20;
+            player.velocity.y = -10; // Bump down
+            AudioSystem.playHit();
+            return false; // Despawn boss on hit for now
         }
 
         return true;
