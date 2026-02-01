@@ -127,7 +127,15 @@ class MultiplayerManager {
                 })
                 .subscribe(async (status) => {
                     if (status === 'SUBSCRIBED') {
-                        // Track presence
+                        // For non-hosts, get current presence state first to determine color
+                        if (!this.isHost) {
+                            const currentState = this.channel.presenceState();
+                            const existingCount = Object.keys(currentState).length;
+                            // Assign color based on position (host is 0, so guests start from 1)
+                            this.localPlayerData.color = this.playerColors[(existingCount) % this.playerColors.length];
+                        }
+
+                        // Track presence with assigned color
                         await this.channel.track(this.localPlayerData);
                         resolve(this.roomCode);
                     } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
