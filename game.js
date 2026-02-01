@@ -14,7 +14,7 @@ class Game {
         this.isRunning = false;
         this.isPaused = false;
         this.isMultiplayer = false; // Multiplayer mode flag
-        this.multiplayerWinScore = 5000; // First to 5000 wins
+        this.multiplayerWinScore = 500; // First to 500 wins
 
         this.remotePlayers = new Map(); // id -> RemotePlayer instance
 
@@ -409,7 +409,7 @@ class Game {
         // Clear existing dots
         track.innerHTML = '';
 
-        const maxAltitude = this.multiplayerWinScore; // 5000
+        const maxAltitude = this.multiplayerWinScore; // 500
         const trackHeight = track.clientHeight;
 
         // Add local player dot
