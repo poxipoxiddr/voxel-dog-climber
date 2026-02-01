@@ -123,6 +123,51 @@ body {
     background-clip: text;
 }
 
+/* Multiplayer Minimap */
+#minimap {
+    position: absolute;
+    top: 100px;
+    left: 20px;
+    width: 12px;
+    height: 40vh;
+    background: rgba(50, 50, 60, 0.6);
+    backdrop-filter: blur(5px);
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 15;
+    pointer-events: none;
+}
+
+#minimap-goal {
+    font-size: 10px;
+    margin-top: -14px;
+}
+
+#minimap-track {
+    flex: 1;
+    width: 100%;
+    position: relative;
+}
+
+#minimap-floor {
+    font-size: 10px;
+    margin-bottom: -14px;
+}
+
+.minimap-dot {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+    transition: bottom 0.1s ease-out;
+}
+
 .hud-bottom {
     position: absolute;
     bottom: 20px;

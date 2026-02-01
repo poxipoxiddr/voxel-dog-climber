@@ -159,10 +159,14 @@ class MultiplayerManager {
             this.localPlayerData.color = this.playerColors[(newPlayers.size) % this.playerColors.length];
         }
 
-        // Trigger joins for anyone new
+        // Trigger joins for anyone new (check against current players map)
         newPlayers.forEach((data, id) => {
-            if (id !== this.localPlayerId && !this.players.has(id)) {
-                if (this.onPlayerJoin) this.onPlayerJoin(id, data);
+            if (id !== this.localPlayerId) {
+                // Always trigger join if not in current players (fixes race condition)
+                if (!this.players.has(id)) {
+                    console.log('Sync: Adding missing player', id, data);
+                    if (this.onPlayerJoin) this.onPlayerJoin(id, data);
+                }
             }
         });
 

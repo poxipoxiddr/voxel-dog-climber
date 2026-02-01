@@ -333,6 +333,9 @@ class Game {
         }
         // Add floor platform for multiplayer
         this.mapGenerator.addFloor();
+        // Show minimap
+        const minimap = document.getElementById('minimap');
+        if (minimap) minimap.classList.remove('hidden');
         this.startGame();
     }
 
@@ -399,6 +402,38 @@ class Game {
         }
     }
 
+    updateMinimap() {
+        const track = document.getElementById('minimap-track');
+        if (!track) return;
+
+        // Clear existing dots
+        track.innerHTML = '';
+
+        const maxAltitude = this.multiplayerWinScore; // 5000
+        const trackHeight = track.clientHeight;
+
+        // Add local player dot
+        const localDot = document.createElement('div');
+        localDot.className = 'minimap-dot';
+        const localColor = Multiplayer.localPlayerData.color || 0x8B5E3C;
+        localDot.style.backgroundColor = '#' + localColor.toString(16).padStart(6, '0');
+        const localY = Math.max(0, Math.min(this.player.position.y, maxAltitude));
+        localDot.style.bottom = (localY / maxAltitude * trackHeight) + 'px';
+        localDot.style.border = '1px solid white'; // Highlight local player
+        track.appendChild(localDot);
+
+        // Add remote player dots
+        this.remotePlayers.forEach((rp) => {
+            const dot = document.createElement('div');
+            dot.className = 'minimap-dot';
+            const rpColor = rp.color || 0x8B5E3C;
+            dot.style.backgroundColor = '#' + rpColor.toString(16).padStart(6, '0');
+            const rpY = Math.max(0, Math.min(rp.position.y, maxAltitude));
+            dot.style.bottom = (rpY / maxAltitude * trackHeight) + 'px';
+            track.appendChild(dot);
+        });
+    }
+
     update() {
         if (!this.isRunning || this.isPaused) return;
 
@@ -435,6 +470,11 @@ class Game {
         // Sync local position to multiplayer
         if (Multiplayer.channel) {
             Multiplayer.sendPosition(this.player.position);
+        }
+
+        // Update minimap in multiplayer mode
+        if (this.isMultiplayer) {
+            this.updateMinimap();
         }
 
         Effects.update(delta, this.scene);
