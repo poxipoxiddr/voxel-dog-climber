@@ -140,23 +140,28 @@ class MultiplayerManager {
     handlePresenceSync(state) {
         // Update local players map from presence state
         const newPlayers = new Map();
-        let colorIndex = 0;
-        for (const key in state) {
+
+        // Sort players by presence state order to assign colors consistently
+        const sortedKeys = Object.keys(state).sort();
+
+        sortedKeys.forEach((key, index) => {
             const presences = state[key];
             if (presences.length > 0) {
                 const playerData = presences[0];
-                // Assign color if not already assigned
+                // Assign color if not already assigned - use index for sequential colors
                 if (!playerData.color) {
-                    playerData.color = this.playerColors[colorIndex % this.playerColors.length];
+                    playerData.color = this.playerColors[index % this.playerColors.length];
                 }
                 newPlayers.set(key, playerData);
-                colorIndex++;
             }
-        }
+        });
 
-        // Update local player color if joining
+        // Update local player color if joining (assign based on current position in the list)
         if (!this.localPlayerData.color && newPlayers.size > 0) {
-            this.localPlayerData.color = this.playerColors[(newPlayers.size) % this.playerColors.length];
+            const localIndex = sortedKeys.indexOf(this.localPlayerId);
+            if (localIndex !== -1) {
+                this.localPlayerData.color = this.playerColors[localIndex % this.playerColors.length];
+            }
         }
 
         // Trigger joins for anyone new (check against current players map)

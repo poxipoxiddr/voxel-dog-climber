@@ -295,6 +295,19 @@ class Game {
                     hostItem.style.borderLeft = `4px solid ${hexColor}`;
                     hostItem.style.fontWeight = '700';
                 }
+
+                // Add click-to-copy functionality for room code
+                roomCodeDisplay.style.cursor = 'pointer';
+                roomCodeDisplay.title = '클릭하여 복사';
+                roomCodeDisplay.addEventListener('click', () => {
+                    navigator.clipboard.writeText(code).then(() => {
+                        const originalText = roomCodeDisplay.textContent;
+                        roomCodeDisplay.textContent = '복사됨!';
+                        setTimeout(() => {
+                            roomCodeDisplay.textContent = originalText;
+                        }, 1000);
+                    });
+                });
             } catch (err) {
                 roomCodeDisplay.textContent = '오류 발생';
                 console.error(err);
@@ -335,6 +348,19 @@ class Game {
 
                 // Show guest player list with waiting message
                 document.getElementById('roomJoined').classList.remove('hidden');
+
+                // Add click-to-copy functionality for room code
+                roomCodeDisplay.style.cursor = 'pointer';
+                roomCodeDisplay.title = '클릭하여 복사';
+                roomCodeDisplay.addEventListener('click', () => {
+                    navigator.clipboard.writeText(code).then(() => {
+                        const originalText = roomCodeDisplay.textContent;
+                        roomCodeDisplay.textContent = '복사됨!';
+                        setTimeout(() => {
+                            roomCodeDisplay.textContent = originalText;
+                        }, 1000);
+                    });
+                });
 
                 Multiplayer.onGameStart = () => {
                     this.isMultiplayer = true;
