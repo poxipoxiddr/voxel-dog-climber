@@ -143,22 +143,6 @@ class Game {
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         CameraController.init(this.camera, isMobile);
         CameraController.setTarget(this.player.model);
-
-        // AI Bot initialization
-        this.aiBot = null;
-        this.autoJoinAI();
-    }
-
-    autoJoinAI() {
-        const targetRoom = '4761';
-        // Wait for Multiplayer to be ready
-        const checkReady = setInterval(() => {
-            if (Multiplayer && Multiplayer.supabase) {
-                clearInterval(checkReady);
-                console.log('Initializing AI Bot for room:', targetRoom);
-                this.aiBot = new AIPlayer(this.scene, targetRoom);
-            }
-        }, 1000);
     }
 
     setupUI() {
@@ -443,7 +427,6 @@ class Game {
 
     resetGame() {
         this.player.reset();
-        if (this.aiBot) this.aiBot.reset();
         this.mapGenerator.reset();
         this.itemManager.reset();
         this.enemyManager.reset();
@@ -548,11 +531,6 @@ class Game {
         const currentTime = Date.now();
         const delta = Math.min((currentTime - this.lastTime) / 1000, 0.1);
         this.lastTime = currentTime;
-
-        // Update AI Bot
-        if (this.aiBot) {
-            this.aiBot.update(delta, this.mapGenerator.getPlatforms(), this.remotePlayers);
-        }
 
         // Update game objects
         const alive = this.player.update(delta, this.mapGenerator.getPlatforms());
