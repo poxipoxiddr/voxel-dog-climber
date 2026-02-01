@@ -123,16 +123,39 @@ const CameraController = {
     currentPosition: new THREE.Vector3(),
     smoothness: 0.1,
 
-    init(camera) {
+    init(camera, isMobile = false) {
         this.camera = camera;
         this.baseFOV = camera.fov;
         this.targetFOV = camera.fov;
-        this.baseOffset = new THREE.Vector3(0, 8, 12);
+
+        // Adjust default offset for mobile if needed
+        if (isMobile) {
+            this.baseOffset = new THREE.Vector3(0, 10, 16);
+        } else {
+            this.baseOffset = new THREE.Vector3(0, 8, 12);
+        }
+
         this.targetOffset = this.baseOffset.clone();
+        this.currentPosition.copy(camera.position);
     },
 
     setTarget(target) {
         this.target = target;
+        // If we don't have a current position yet, or it's at origin, snap to target
+        if (target && (this.currentPosition.length() === 0)) {
+            this.snap();
+        }
+    },
+
+    snap() {
+        if (!this.target || !this.camera) return;
+        this.currentPosition.copy(this.target.position).add(this.targetOffset);
+        this.camera.position.copy(this.currentPosition);
+        this.camera.lookAt(
+            this.target.position.x,
+            this.target.position.y + 2,
+            this.target.position.z
+        );
     },
 
     setSpeedEffect(active) {

@@ -139,7 +139,8 @@ class Game {
         this.hamsterManager = new HamsterManager(this.scene, this.player);
         this.scoring = new ScoringSystem();
 
-        CameraController.init(this.camera);
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        CameraController.init(this.camera, isMobile);
         CameraController.setTarget(this.player.model);
     }
 
@@ -339,6 +340,10 @@ class Game {
         this.isRunning = true;
         this.isPaused = false;
         this.lastTime = Date.now();
+        // Snap camera to player at start
+        if (typeof CameraController !== 'undefined') {
+            CameraController.snap();
+        }
     }
 
     resetGame() {

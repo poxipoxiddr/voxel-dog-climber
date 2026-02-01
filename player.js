@@ -483,6 +483,11 @@ class Player {
 
         // Ensure position and rotation are maintained
         this.model.position.copy(this.position);
+
+        // Update camera target to the new model
+        if (typeof CameraController !== 'undefined') {
+            CameraController.setTarget(this.model);
+        }
     }
 
     activateLevitation(duration = 3) { // Reduced from 5 to 3 seconds
