@@ -150,7 +150,15 @@
                 <p class="room-hint">친구에게 이 코드를 공유하세요!</p>
             </div>
 
-            <!-- Step 2c: Player List and Start (Host only) -->
+            <!-- Step 2c: Player List for Guests -->
+            <div id="roomJoined" class="room-info hidden">
+                <div class="player-list" id="guestPlayerList">
+                    <!-- Players will be added here dynamically -->
+                </div>
+                <div class="waiting-message">게임 대기중...</div>
+            </div>
+
+            <!-- Step 2d: Player List and Start (Host only) -->
             <div id="roomCreated" class="room-info hidden">
                 <div class="player-list" id="playerList">
                     <div class="player-item host">🐕 호스트 (나)</div>

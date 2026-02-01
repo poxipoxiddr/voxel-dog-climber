@@ -14,7 +14,8 @@ class Game {
         this.isRunning = false;
         this.isPaused = false;
         this.isMultiplayer = false; // Multiplayer mode flag
-        this.multiplayerWinScore = 500; // First to 500 wins
+        this.multiplayerWinScore = 5000; // First to 5000 points wins
+        this.multiplayerMaxAltitude = 500; // Minimap shows 0-500m range
 
         this.remotePlayers = new Map(); // id -> RemotePlayer instance
 
@@ -174,8 +175,24 @@ class Game {
 
         restartBtn.addEventListener('click', () => {
             gameOverScreen.classList.add('hidden');
-            this.resetGame();
-            this.startGame();
+
+            // In multiplayer mode, return to lobby instead of restarting
+            if (this.isMultiplayer) {
+                // Hide minimap
+                const minimap = document.getElementById('minimap');
+                if (minimap) minimap.classList.add('hidden');
+
+                // Show lobby instead of instructions
+                const multiplayerLobby = document.getElementById('multiplayerLobby');
+                multiplayerLobby.classList.remove('hidden');
+
+                // Reset multiplayer flag
+                this.isMultiplayer = false;
+                this.isRunning = false;
+            } else {
+                this.resetGame();
+                this.startGame();
+            }
         });
 
         // Initialize Multiplayer with config
@@ -186,17 +203,31 @@ class Game {
             const remotePlayer = new RemotePlayer(this.scene, { id, ...data });
             this.remotePlayers.set(id, remotePlayer);
 
-            // Lobby UI update if visible
+            // Lobby UI update - add to both host and guest player lists
+            const hexColor = '#' + data.color.toString(16).padStart(6, '0');
+
+            // Add to host's player list
             const playerList = document.getElementById('playerList');
             if (playerList) {
                 const item = document.createElement('div');
                 item.className = 'player-item';
                 item.id = 'player-' + id;
-                const hexColor = '#' + data.color.toString(16).padStart(6, '0');
                 item.style.borderLeft = `4px solid ${hexColor}`;
                 item.style.fontWeight = '700';
                 item.textContent = `🐕 ${data.name}`;
                 playerList.appendChild(item);
+            }
+
+            // Add to guest's player list (for non-hosts viewing)
+            const guestPlayerList = document.getElementById('guestPlayerList');
+            if (guestPlayerList) {
+                const guestItem = document.createElement('div');
+                guestItem.className = 'player-item';
+                guestItem.id = 'guest-player-' + id;
+                guestItem.style.borderLeft = `4px solid ${hexColor}`;
+                guestItem.style.fontWeight = '700';
+                guestItem.textContent = `🐕 ${data.name}`;
+                guestPlayerList.appendChild(guestItem);
             }
         };
 
@@ -206,8 +237,12 @@ class Game {
                 remotePlayer.destroy();
                 this.remotePlayers.delete(id);
             }
+            // Remove from host list
             const item = document.getElementById('player-' + id);
             if (item) item.remove();
+            // Remove from guest list
+            const guestItem = document.getElementById('guest-player-' + id);
+            if (guestItem) guestItem.remove();
         };
 
         Multiplayer.onPlayerUpdate = (id, pos) => {
@@ -297,6 +332,9 @@ class Game {
                 // Show room code info only after successful join
                 document.getElementById('roomCodeInfo').classList.remove('hidden');
                 roomCodeDisplay.textContent = code;
+
+                // Show guest player list with waiting message
+                document.getElementById('roomJoined').classList.remove('hidden');
 
                 Multiplayer.onGameStart = () => {
                     this.isMultiplayer = true;
@@ -409,7 +447,7 @@ class Game {
         // Clear existing dots
         track.innerHTML = '';
 
-        const maxAltitude = this.multiplayerWinScore; // 500
+        const maxAltitude = this.multiplayerMaxAltitude; // 500m for minimap
         const trackHeight = track.clientHeight;
 
         // Add local player dot
