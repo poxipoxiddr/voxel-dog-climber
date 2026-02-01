@@ -79,6 +79,11 @@ class MapGenerator {
 
         // Remove platforms that are far below the player (increased retention)
         this.platforms = this.platforms.filter(platform => {
+            // Never remove permanent platforms (like multiplayer floor)
+            if (platform.userData.isPermanent) {
+                return true;
+            }
+
             if (platform.position.y < playerY - 40) { // Increased from 20 to 40
                 this.scene.remove(platform);
                 return false;
@@ -110,6 +115,7 @@ class MapGenerator {
         floor.userData.width = 40;
         floor.userData.depth = 40;
         floor.userData.height = 1;
+        floor.userData.isPermanent = true; // Prevent culling
         this.scene.add(floor);
         this.platforms.push(floor);
     }
