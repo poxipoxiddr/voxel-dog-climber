@@ -70,7 +70,7 @@ class MapGenerator {
         this.platforms.push(platform);
     }
 
-    update(playerY) {
+    update(playerY, isMultiplayer = false) {
         // Generate new platforms if player is climbing
         while (this.highestPlatform < playerY + this.generationAhead) {
             this.highestPlatform += this.platformSpacing;
@@ -78,13 +78,14 @@ class MapGenerator {
         }
 
         // Remove platforms that are far below the player (increased retention)
+        // Disable removal in multiplayer mode to prevent other players from falling
         this.platforms = this.platforms.filter(platform => {
             // Never remove permanent platforms (like multiplayer floor)
             if (platform.userData.isPermanent) {
                 return true;
             }
 
-            if (platform.position.y < playerY - 40) { // Increased from 20 to 40
+            if (!isMultiplayer && platform.position.y < playerY - 40) { // Increased from 20 to 40
                 this.scene.remove(platform);
                 return false;
             }

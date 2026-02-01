@@ -539,7 +539,7 @@ class Game {
             return;
         }
 
-        this.mapGenerator.update(this.player.position.y);
+        this.mapGenerator.update(this.player.position.y, this.isMultiplayer);
         const platforms = this.mapGenerator.getPlatforms();
 
         this.itemManager.update(delta, this.player, platforms);
